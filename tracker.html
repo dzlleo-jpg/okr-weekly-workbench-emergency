@@ -680,12 +680,12 @@ function saveWeek(){
 }
 function savePatch(key,patch){
   saveDot('saving');
-  deb('save-'+key,function(){(db?firebasePatch(patch):sitesPatch(patch)).then(function(){saveDot('saved');setTimeout(function(){saveDot('idle')},1000)}).catch(function(e){console.error(e);saveDot('failed')})},600);
+  deb('save-'+key,function(){(db?firebasePatch(patch):sitesPatch(patch)).then(function(){saveDot('saved');setTimeout(function(){saveDot('idle')},4000)}).catch(function(e){console.error(e);saveDot('failed')})},600);
 }
 function saveWeekPatch(){
   var mon=S.meta.weekList[S.wi];
   saveDot('saving');
-  deb('save-week-'+mon,function(){(db?firebasePatch({op:'week',week:mon,weekState:S.wd}):sitesPatch({op:'week',week:mon,weekState:S.wd})).then(function(){saveDot('saved');setTimeout(function(){saveDot('idle')},1000)}).catch(function(e){console.error(e);saveDot('failed')})},600);
+  deb('save-week-'+mon,function(){(db?firebasePatch({op:'week',week:mon,weekState:S.wd}):sitesPatch({op:'week',week:mon,weekState:S.wd})).then(function(){saveDot('saved');setTimeout(function(){saveDot('idle')},4000)}).catch(function(e){console.error(e);saveDot('failed')})},600);
 }
 
 // ── actions (text edits: no render; structural changes: render) ──
