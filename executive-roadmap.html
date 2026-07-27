@@ -1,0 +1,1012 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>2026 团队重点工作高层对标</title>
+  <style>
+    :root {
+      --bg: #f7f6f1;
+      --ink: #202124;
+      --muted: #686d73;
+      --line: #d9d4c8;
+      --panel: #fffefa;
+      --soft: #ece7dc;
+      --green: #147755;
+      --blue: #235e9d;
+      --amber: #9a5a12;
+      --red: #a44036;
+      --shadow: 0 18px 48px rgba(34, 33, 28, .08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: linear-gradient(180deg, #fffdf8 0, var(--bg) 260px);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      letter-spacing: 0;
+    }
+
+    .page {
+      width: min(1480px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 30px 0 46px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 24px;
+      align-items: end;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(28px, 3.2vw, 44px);
+      line-height: 1.08;
+      font-weight: 820;
+    }
+
+    .lead {
+      max-width: 940px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    .stamp {
+      text-align: right;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.7;
+      white-space: nowrap;
+    }
+
+    .scoreboard {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin: 18px 0 20px;
+    }
+
+    .score {
+      min-height: 86px;
+      padding: 15px 16px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .score b {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 29px;
+      line-height: 1;
+    }
+
+    .score span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .sync-status {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: center;
+      margin: -6px 0 18px;
+      padding: 12px 14px;
+      color: var(--muted);
+      background: rgba(255, 254, 250, .72);
+      border: 1px solid var(--line);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .sync-status b {
+      color: var(--ink);
+      font-weight: 760;
+    }
+
+    .sync-status span:last-child {
+      white-space: nowrap;
+    }
+
+    .stage-map {
+      display: grid;
+      grid-template-columns: 250px 1.1fr 1.1fr 1.28fr 150px 180px;
+      min-width: 1680px;
+      margin-bottom: 10px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .stage-map > div {
+      padding: 12px 14px;
+      border-right: 1px solid var(--line);
+    }
+
+    .stage-map > div:last-child { border-right: 0; }
+
+    .stage-map strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+
+    .stage-map span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .table-scroll {
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+
+    .roadmap {
+      display: grid;
+      gap: 16px;
+      min-width: 1680px;
+    }
+
+    .group {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .group-head {
+      display: grid;
+      grid-template-columns: 250px 1fr 180px;
+      gap: 16px;
+      align-items: start;
+      padding: 15px 16px;
+      background: linear-gradient(90deg, rgba(236, 231, 220, .82), rgba(255, 254, 250, .94));
+      border-bottom: 1px solid var(--line);
+    }
+
+    .group-title {
+      display: grid;
+      gap: 8px;
+    }
+
+    .group-title h2 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.35;
+    }
+
+    .group-story {
+      margin: 0;
+      color: #44484d;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .group-focus {
+      display: grid;
+      gap: 8px;
+      justify-items: start;
+    }
+
+    .subrow {
+      display: grid;
+      grid-template-columns: 250px 1.1fr 1.1fr 1.28fr 150px 180px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .subrow:last-child {
+      border-bottom: 0;
+    }
+
+    .subrow > div {
+      min-height: 132px;
+      padding: 12px;
+      border-right: 1px solid var(--line);
+    }
+
+    .subrow > div:last-child {
+      border-right: 0;
+    }
+
+    .subname {
+      display: grid;
+      gap: 8px;
+      align-content: start;
+      background: rgba(255, 255, 255, .48);
+    }
+
+    .subname b {
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .subname span {
+      width: fit-content;
+      padding: 4px 8px;
+      color: #4f5359;
+      background: var(--soft);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      font-size: 12px;
+    }
+
+    .mcell {
+      display: grid;
+      gap: 7px;
+      align-content: start;
+    }
+
+    .mcell strong {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      line-height: 1.25;
+    }
+
+    .mcell strong::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      background: var(--blue);
+      border-radius: 999px;
+    }
+
+    .mcell p,
+    .future-cell p,
+    .judge p {
+      margin: 0;
+      color: #4f5359;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .sync-note {
+      display: grid;
+      gap: 4px;
+      margin-top: 8px;
+      padding: 8px 9px;
+      background: rgba(35, 94, 157, .07);
+      border: 1px solid rgba(35, 94, 157, .18);
+      border-radius: 6px;
+    }
+
+    .sync-note b {
+      color: var(--blue);
+      font-size: 11px;
+      line-height: 1.25;
+    }
+
+    .sync-note span {
+      color: #4f5359;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .future-cell {
+      display: grid;
+      gap: 8px;
+      align-content: start;
+      color: #8f887c;
+      background: rgba(236, 231, 220, .38);
+    }
+
+    .future-ticks {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 4px;
+      color: #9d968a;
+      font-size: 10px;
+      text-align: center;
+    }
+
+    .future-ticks span {
+      padding: 5px 1px;
+      border: 1px dashed #d8d3c8;
+      border-radius: 5px;
+    }
+
+    .judge {
+      display: grid;
+      gap: 8px;
+      align-content: start;
+    }
+
+    .project {
+      display: grid;
+      grid-template-columns: 250px 3.4fr 2.75fr .45fr 180px;
+      min-height: 218px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .project > section {
+      padding: 14px;
+      border-right: 1px solid var(--line);
+    }
+
+    .project > section:last-child { border-right: 0; }
+
+    .project-meta {
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .id {
+      display: inline-flex;
+      width: fit-content;
+      min-height: 25px;
+      align-items: center;
+      padding: 4px 9px;
+      color: #fff;
+      background: var(--ink);
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 760;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.38;
+      font-weight: 780;
+    }
+
+    .storyline {
+      margin: 0;
+      color: #44484d;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .subprojects {
+      display: grid;
+      gap: 6px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .subprojects li {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 6px 8px;
+      color: #4f5359;
+      background: var(--soft);
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .subprojects b {
+      color: var(--ink);
+      font-weight: 760;
+      white-space: nowrap;
+    }
+
+    .progress {
+      display: grid;
+      gap: 6px;
+    }
+
+    .progress-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .bar {
+      height: 8px;
+      overflow: hidden;
+      background: #e5e0d5;
+      border-radius: 999px;
+    }
+
+    .bar i {
+      display: block;
+      width: var(--value);
+      height: 100%;
+      background: linear-gradient(90deg, var(--green), var(--blue));
+      border-radius: inherit;
+    }
+
+    .stage-cell {
+      display: grid;
+      gap: 10px;
+      align-content: start;
+    }
+
+    .stage-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .nodes {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 7px;
+    }
+
+    .project > .stage-cell:nth-of-type(2) .nodes {
+      grid-template-columns: .42fr .42fr 1.72fr 1.72fr;
+    }
+
+    .project > .stage-cell:nth-of-type(3) .nodes {
+      grid-template-columns: 2.35fr .42fr .42fr .42fr;
+    }
+
+    .project > .stage-cell:nth-of-type(4) .nodes {
+      grid-template-columns: repeat(4, minmax(20px, 1fr));
+      gap: 4px;
+    }
+
+    .node {
+      min-height: 132px;
+      padding: 11px;
+      background: #fff;
+      border: 1px solid #cfcabe;
+      border-radius: 8px;
+    }
+
+    .node.empty {
+      display: grid;
+      place-items: center;
+      color: #aaa396;
+      background: transparent;
+      border-style: dashed;
+      font-size: 12px;
+      min-height: 132px;
+    }
+
+    .project > .stage-cell:nth-of-type(4) .node.empty {
+      min-height: 132px;
+      padding: 6px 1px;
+      font-size: 10px;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+    }
+
+    .month {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      font-size: 12px;
+      font-weight: 780;
+    }
+
+    .month i {
+      width: 9px;
+      height: 9px;
+      background: var(--blue);
+      border-radius: 999px;
+    }
+
+    .node p {
+      margin: 0;
+      color: #4f5359;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .subline {
+      display: grid;
+      gap: 6px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      color: #4f5359;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .subline li {
+      position: relative;
+      padding-left: 10px;
+    }
+
+    .subline li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: .62em;
+      width: 4px;
+      height: 4px;
+      background: var(--blue);
+      border-radius: 999px;
+    }
+
+    .subline b {
+      color: var(--ink);
+      font-weight: 760;
+    }
+
+    .status {
+      display: grid;
+      gap: 8px;
+      align-content: start;
+    }
+
+    .badge {
+      width: fit-content;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 760;
+      white-space: nowrap;
+    }
+
+    .lead-badge { color: var(--green); background: rgba(20, 119, 85, .1); }
+    .track-badge { color: var(--blue); background: rgba(35, 94, 157, .1); }
+    .watch-badge { color: var(--amber); background: rgba(154, 90, 18, .12); }
+    .risk-badge { color: var(--red); background: rgba(164, 64, 54, .1); }
+
+    .status p {
+      margin: 0;
+      color: #4f5359;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    footer {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    @media (max-width: 900px) {
+      header,
+      .scoreboard {
+        grid-template-columns: 1fr;
+      }
+
+      .stamp {
+        text-align: left;
+      }
+
+      .sync-status {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .sync-status span:last-child {
+        white-space: normal;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav style="padding:10px 20px;font-size:12px;color:#686d73;background:rgba(236,231,220,.5);border-bottom:1px solid #d9d4c8">
+    <a href="./index.html" style="color:#235e9d;text-decoration:none;font-weight:600">← 工作台</a>
+    <span style="margin:0 8px">·</span>
+    <a href="./tracker.html" style="color:#686d73;text-decoration:none">周报编辑</a>
+  </nav>
+  <main class="page">
+    <header>
+      <div>
+        <h1>2026 团队重点工作高层对标</h1>
+        <p class="lead">面向高层查看的简版路线图：按 8 个重点项目横向对标，用 3-5 月主线叙事讲清楚项目演进，并叠加本地快照中的最新周报信号。</p>
+      </div>
+      <div class="stamp">
+        数据源：团队OKR-2026-05-22.xlsx + current-okr.json<br>
+        覆盖周次：W11-W25 · 最新周：2026-06-16
+      </div>
+    </header>
+
+    <section class="scoreboard" id="scoreboard"></section>
+    <section class="sync-status" id="syncStatus">
+      <span><b>周报同步：</b>正在使用静态路线图，稍后自动检查在线周报。</span>
+      <span>按每周三节奏刷新；同一周三周期内复用缓存。</span>
+    </section>
+
+    <section class="table-scroll">
+      <div class="stage-map">
+        <div><strong>子项目</strong><span>大项目内固定工作线</span></div>
+        <div><strong>3月：定方向</strong><span>识别问题、明确抓手</span></div>
+        <div><strong>4月：做成型</strong><span>方案、样机、验证推进</span></div>
+        <div><strong>5月：抓落地</strong><span>最新成果和当前阻塞</span></div>
+        <div><strong>后续</strong><span>6-12月节奏</span></div>
+        <div><strong>高层关注</strong><span>关键判断</span></div>
+      </div>
+
+      <section class="roadmap" id="roadmap"></section>
+    </section>
+
+    <footer>
+      说明：本页按项目编号合并了 Excel 中因早期命名变化产生的重复项目；月度节点采用各月最后一周作为代表，并压缩为高层可读的关键结果。
+    </footer>
+  </main>
+<script>
+var ROADMAP_DATA = [
+  {
+    id:"O1", title:"零负担智慧家庭能源管理体验", progress:49,
+    story:"把业主和安装商两端的复杂流程压缩成可落地的智能体验，当前主线推进正常，但部分新线优先级需要收敛。",
+    badge:"watch", badgeText:"需聚焦",
+    subs:[
+      {name:"业主侧智慧交互",status:"70%",m3:{title:"全流程起盘",text:"GUI 初稿输出，AI 进阶方向启动。"},m4:{title:"高保真推进",text:"电价识别、此刻、日报等核心体验进入细化。"},m5:{title:"材料完成",text:"电价、此刻、日报材料完成，930 光储充热高保真修改中。"},future:"进入版本落地和案例验证。",judge:{badge:"track",text:"主线稳定",note:"已经能讲出从痛点到方案的完整链路。"}},
+      {name:"安装商智慧运维",status:"70%",m3:{title:"识别 NSS 机会",text:"拆解安装商售前和开局流程，明确 NSS 提升突破口。"},m4:{title:"串联销售流程",text:"售前流程、销售工具和 JDC 调研准备同步推进。"},m5:{title:"短暂停滞",text:"销售流程已串联，但调研节奏放缓，需要恢复一线输入。"},future:"补齐调研闭环，牵引方案落地。",judge:{badge:"watch",text:"需推动",note:"高层可关注业务侧资源配合。"}},
+      {name:"方案包装与宣传",status:"65%",m3:{title:"三线启动",text:"大会调研、视频分镜、项目总结同步起盘。"},m4:{title:"形成素材",text:"调研报告、视频初稿、展会特性进入分镜。"},m5:{title:"可展示化",text:"视频初稿完成，展会演示和可点击 Demo 继续更新。"},future:"用于展会和对外叙事。",judge:{badge:"track",text:"支撑汇报",note:"有助于把项目成果讲清楚。"}},
+      {name:"订阅开通 / 设计工具",status:"低位",m3:{title:"开通接近完成",text:"工商业 AI 光储开通方案按评审修改。"},m4:{title:"新线启动",text:"订阅收费低保真推进，设计工具进入需求管道。"},m5:{title:"暂时挂起",text:"订阅开通和设计工具均处低位，资源和优先级未收敛。"},future:"需要明确是否继续作为主线。",judge:{badge:"risk",text:"需取舍",note:"避免稀释 O1 主线成果。"}}
+    ]
+  },
+  {
+    id:"O2", title:"预测性电站运维体验", progress:56,
+    story:"从健康卫士切入，扩展到调度、交易和下一代 Agent，目标是把事后排障前移成主动诊断。",
+    badge:"track", badgeText:"稳步推进",
+    subs:[
+      {name:"健康卫士",status:"80%",m3:{title:"方案预审",text:"光伏/构网健康卫士 630 方案完成预审。"},m4:{title:"样板成型",text:"关键页面视觉完成，展会视频和一键诊断体验推进。"},m5:{title:"输出完毕",text:"展会视频和 Demo 输出完毕，定稿材料整理中。"},future:"看海外局点验证和版本落地。",judge:{badge:"lead",text:"成果明确",note:"已形成可展示样板。"}},
+      {name:"风光储能量管理",status:"60%",m3:{title:"范围收敛",text:"调度方案待评审，风光储监控范围明确。"},m4:{title:"Demo 推进",text:"计划曲线 Demo 高保真修改，交易辅助边界明确。"},m5:{title:"对齐数据",text:"与 MO 对齐曲线数据和文案，三方工作量评估中。"},future:"继续验证业务数据和客户反馈。",judge:{badge:"track",text:"可推进",note:"需要产品和三方资源配合。"}},
+      {name:"下一代运维概念",status:"50%",m3:{title:"Agent 定边界",text:"收敛 Agent 范围和多端必要性。"},m4:{title:"场景深化",text:"围绕排障、诊断、调度、交易打磨方案差异。"},m5:{title:"价值梳理",text:"整理下一代方案整体阐述逻辑和价值设计点。"},future:"需要客户反馈验证概念价值。",judge:{badge:"watch",text:"需验证",note:"概念要尽快进入客户侧闭环。"}},
+      {name:"930 落地需求",status:"35%",m3:{title:"未成主线",text:"3 月以展会和方案为主，落地需求尚未展开。"},m4:{title:"需求出现",text:"储能箱和通信状态等监控需求开始进入视野。"},m5:{title:"开始承接",text:"V3 储能箱、通信拓扑、顺控工具需求进入评审和承接。"},future:"需要和版本排期绑定。",judge:{badge:"watch",text:"看排期",note:"决定展示成果能否转成版本成果。"}}
+    ]
+  },
+  {
+    id:"O3", title:"主动运维与 AI 故障诊断", progress:80,
+    story:"先定义主动运维范式，再把 AI 诊断、OTA 和开通体验拉到 Q3 可落地范围，是当前节奏最清晰的项目之一。",
+    badge:"lead", badgeText:"进展领先",
+    subs:[
+      {name:"AI 故障诊断",status:"70%",m3:{title:"概念成型",text:"从根因、结论、建议切入，完成诊断框架。"},m4:{title:"范式沉淀",text:"基于研讨优化主动运维平台规范。"},m5:{title:"进 Q3 范围",text:"聚焦主动预警、决策树和根因分析。"},future:"看评审结论和开发还原。",judge:{badge:"lead",text:"可复制",note:"有机会沉淀主动运维设计范式。"}},
+      {name:"无感 OTA 升级",status:"75%",m3:{title:"方向明确",text:"围绕最小影响升级建立体验方向。"},m4:{title:"端到端设计",text:"端到端方案完成，并和 SE 沟通可行性。"},m5:{title:"范围收敛",text:"Q3 聚焦业主 App 侧最小影响可视化。"},future:"等待版本范围确认。",judge:{badge:"track",text:"方向清楚",note:"关键看 SE 和版本管道。"}},
+      {name:"AI 光储充开通",status:"95%",m3:{title:"准备高保真",text:"围绕光储充开通体验启动方案。"},m4:{title:"高保真推进",text:"对齐工商业现网版本，高保真设计推进。"},m5:{title:"已交付",text:"高保真已交付，进入开发还原检视。"},future:"跟进开发还原质量。",judge:{badge:"lead",text:"交付领先",note:"已从方案进入交付检视。"}},
+      {name:"充电主动运维平台",status:"80%",m3:{title:"基础调研",text:"从充电场站开站和护航经验起步。"},m4:{title:"价值筛选",text:"重卡超充联盟价值有限，基础落地方向保留。"},m5:{title:"平台规范",text:"视觉排期梳理大屏规范，预计继续对齐。"},future:"看大屏规范和落地场景。",judge:{badge:"track",text:"补齐平台",note:"作为主动运维体系的基础承接。"}}
+    ]
+  },
+  {
+    id:"O4", title:"官网数智化销售作战平台", progress:50,
+    story:"从销售助手切入官网转化，但项目成败依赖业务需求、客户访谈和真实销售场景输入。",
+    badge:"watch", badgeText:"需业务牵引",
+    subs:[
+      {name:"智能销售助手",status:"50%",m3:{title:"搭知识库",text:"对话、推荐和导购报告启动。"},m4:{title:"做样例",text:"泰国减税收益报告交付，创新 Demo 整理。"},m5:{title:"待对齐",text:"业务需求偏少，创新方案需要重新对齐。"},future:"回到线索增长和销售任务。",judge:{badge:"watch",text:"缺输入",note:"不是设计能力问题，是业务牵引不足。"}},
+      {name:"销售经验沉淀",status:"50%",m3:{title:"找渠道",text:"寻找销售深访渠道，建立访谈框架。"},m4:{title:"JDC 推进",text:"围绕山西能源等客户准备访谈内容。"},m5:{title:"继续补样本",text:"继续 JDC，重点寻找一二线城市客户。"},future:"沉淀销售方法和客户画像。",judge:{badge:"watch",text:"需客户样本",note:"样本质量决定平台方向。"}}
+    ]
+  },
+  {
+    id:"O5", title:"小艺知识问答垂域体验", progress:92,
+    story:"当前标杆项目：从体验 Demo 快速推进到 skill、模板、专利和上线验证，形成设计牵引能力建设样板。",
+    badge:"lead", badgeText:"标杆项目",
+    subs:[
+      {name:"PPT 生成链路",status:"90%",m3:{title:"体系启动",text:"生成链路、模板体系和报告质量改造启动。"},m4:{title:"进入开发",text:"skill 集成、DNA 模板提交开发。"},m5:{title:"扩设计资产",text:"10+ 风格模板生成，设计侧干预策略继续探索。"},future:"看上线效果和模板规模化。",judge:{badge:"lead",text:"能力沉淀",note:"已不是单点设计，而是工具链能力。"}},
+      {name:"交互式学习",status:"95%",m3:{title:"流程成型",text:"知识点学习、测试、回顾低保真流程完成。"},m4:{title:"高保真交付",text:"高保真细节修改交付，联动专利同步整理。"},m5:{title:"进入评审",text:"需求上 UXD-DMG，语义符号联动专利通过。"},future:"看版本开发和体验验证。",judge:{badge:"lead",text:"成果扎实",note:"同时有方案、专利和版本入口。"}},
+      {name:"自然语言创作",status:"90%",m3:{title:"Demo 孵化",text:"多 Agent 研讨和深度采访式写作 Demo 启动。"},m4:{title:"方案定稿",text:"深度研究可视可控方案内部定稿。"},m5:{title:"开发中",text:"方案开发中，等待平台规范侧统一范式。"},future:"随平台范式统一后收口。",judge:{badge:"track",text:"等待统一",note:"平台范式会影响最终体验。"}}
+    ]
+  },
+  {
+    id:"O6", title:"乾崑智驾一站式体验 APP", progress:50,
+    story:"从单页面优化扩展到购车、展厅、助手和车主运营，把智能化解决方案包装成一站式体验。",
+    badge:"track", badgeText:"方向收敛中",
+    subs:[
+      {name:"首页 / 我的",status:"可落地",m3:{title:"启动改版",text:"「我的」页面改版启动，信息架构优化。"},m4:{title:"方案输出",text:"智能助手和「我的」改版输出。"},m5:{title:"已对齐",text:"首页和「我的」已和业务对齐，可尽快落地。"},future:"优先推动快速落地。",judge:{badge:"track",text:"可先交付",note:"适合作为短期成果。"}},
+      {name:"展厅 / 探索",status:"演进中",m3:{title:"展厅起盘",text:"展厅创新设计优化，和产品对标下一步。"},m4:{title:"继续深化",text:"展厅和探索体验继续补创新表达。"},m5:{title:"梳理创新点",text:"探索、展厅继续梳理智能化卖点和体验路径。"},future:"需要统一用户定位。",judge:{badge:"watch",text:"需收敛",note:"创新表达要避免分散。"}},
+      {name:"购车 / 助手",status:"深化中",m3:{title:"规划阶段",text:"整体工作规划整理，明确潜客转化方向。"},m4:{title:"场景扩展",text:"新增启境购车，智能助手输出。"},m5:{title:"持续演进",text:"购车和助手继续演进，等待统一定位。"},future:"结合销售和车主旅程推进。",judge:{badge:"track",text:"中期价值",note:"决定 APP 的智能化差异。"}}
+    ]
+  },
+  {
+    id:"O7", title:"NetEco 站点运维体验重构", progress:50,
+    story:"价值在于用户验证：从旅程和架构梳理，到低保真评审和多区域访谈，逐步建立重构可信度。",
+    badge:"track", badgeText:"验证扎实",
+    subs:[
+      {name:"站点列表 / 概览",status:"50%",m3:{title:"底座搭建",text:"L2 用户旅程和 After 架构梳理一版。"},m4:{title:"两轮评审",text:"站点列表、概览、锂电池详情低保真完成两轮评审。"},m5:{title:"高保真闭环",text:"列表和概览高保真本周闭环。"},future:"跟进开发和用户验证。",judge:{badge:"track",text:"基础扎实",note:"已从旅程进入具体页面。"}},
+      {name:"用户访谈验证",status:"完成报告",m3:{title:"准备验证",text:"方案等待与电站和一线用户对齐。"},m4:{title:"4 位认可",text:"南非、广东、安徽等 4 位用户基本认可低保真。"},m5:{title:"6 位报告完成",text:"葡萄牙、南非、安徽等 6 位用户访谈报告完成。"},future:"把访谈结论转成产品决策。",judge:{badge:"lead",text:"可信度高",note:"这是最能支撑高层认可的证据。"}},
+      {name:"数字孪生 / 关键模块",status:"修改中",m3:{title:"探索 Demo",text:"重构探索 Demo 输出，设计理念继续细化。"},m4:{title:"规划视频",text:"26 年规划视频高保真推进。"},m5:{title:"扩展模块",text:"首页、告警、报表、建站和数字孪生进入讨论。"},future:"收敛关键模块优先级。",judge:{badge:"track",text:"后续扩展",note:"适合作为体验重构第二阶段。"}}
+    ]
+  },
+  {
+    id:"O8", title:"数据中心高品质创新产品", progress:0,
+    story:"已有具体创新产出，但管理口径没有跟上，需要把概念孵化转成清晰规划牵引和落地评价。",
+    badge:"risk", badgeText:"需澄清口径",
+    subs:[
+      {name:"DMaaS 维保 / 续保",status:"已交付",m3:{title:"已交付",text:"维保提醒和一键续保已交付。"},m4:{title:"等待承接",text:"相关方向未继续放大，等待产品口径。"},m5:{title:"非主线",text:"5 月主要精力转向锂电大屏和 TMU 健康报告。"},future:"确认是否纳入后续规划。",judge:{badge:"track",text:"已有成果",note:"但需要被纳入评价口径。"}},
+      {name:"锂电作战大屏",status:"修改中",m3:{title:"需求待澄清",text:"630 需求尚未澄清，规划牵引不足。"},m4:{title:"高保真完成",text:"锂电故障预测大屏高保真完成。"},m5:{title:"低保真修改",text:"代表处维度按评审意见继续修改。"},future:"看产品是否纳入规划。",judge:{badge:"watch",text:"需产品牵引",note:"否则方案价值难被确认。"}},
+      {name:"TMU 健康报告",status:"高保真中",m3:{title:"未启动",text:"3 月主要在 DMaaS 和需求澄清。"},m4:{title:"方向出现",text:"数据中心健康类报告方向开始形成。"},m5:{title:"高保真中",text:"TMU 健康报告低保真完成，高保真设计中。"},future:"明确版本路径和评价方式。",judge:{badge:"risk",text:"口径优先",note:"先定标准，再继续扩方案。"}}
+    ]
+  }
+];
+
+var SCOREBOARD = {projects:8, months:"3-6月", avgProgress:"53%", focus:"O1 / O8"};
+var SYNC_CACHE_KEY = "teamOkrRoadmapLiveSync:v2";
+var firebaseConfig = {
+  apiKey: "AIzaSyCzQ81s_xCVQzhGrKKspjqaxIDlujvbmKc",
+  authDomain: "family-sync-app-b3d51.firebaseapp.com",
+  databaseURL: "https://family-sync-app-b3d51-default-rtdb.firebaseio.com",
+  projectId: "family-sync-app-b3d51",
+  storageBucket: "family-sync-app-b3d51.firebasestorage.app",
+  messagingSenderId: "545912389388",
+  appId: "1:545912389388:web:95de71d8248310b8821329"
+};
+
+function esc(s){
+  return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+function setSyncStatus(main, detail){
+  var el=document.getElementById("syncStatus");
+  if(!el)return;
+  el.innerHTML="<span><b>周报同步：</b>"+esc(main)+"</span><span>"+esc(detail||"")+"</span>";
+}
+
+function syncLabel(mon){
+  var d=new Date(mon),j=new Date(d.getFullYear(),0,1);
+  var w=Math.ceil(((d-j)/864e5+j.getDay())/7);
+  return "W"+w+" ("+mon+")";
+}
+
+function syncCycleKey(d){
+  var t=d?new Date(d):new Date();
+  t.setHours(0,0,0,0);
+  var day=t.getDay();
+  var daysSinceWed=(day+4)%7;
+  t.setDate(t.getDate()-daysSinceWed);
+  return t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0");
+}
+
+function fixArr(v){
+  if(!v)return[];
+  if(Array.isArray(v))return v;
+  if(typeof v==="object"){
+    var ks=Object.keys(v);
+    if(ks.every(function(k){return !isNaN(k)})){
+      return ks.sort(function(a,b){return +a-+b}).map(function(k){return v[k]});
+    }
+  }
+  return[v];
+}
+
+function fixWeekData(wd){
+  if(!wd)return null;
+  wd.struct=fixArr(wd.struct);
+  wd.struct.forEach(function(obj){obj.krIds=fixArr(obj.krIds)});
+  if(!wd.krs)wd.krs={};
+  return wd;
+}
+
+function loadScript(src){
+  return new Promise(function(resolve,reject){
+    var s=document.createElement("script");
+    var done=false;
+    var timer=setTimeout(function(){
+      if(done)return;
+      done=true;
+      s.remove();
+      reject(new Error("加载超时："+src));
+    },5000);
+    s.onload=function(){
+      if(done)return;
+      done=true;
+      clearTimeout(timer);
+      resolve();
+    };
+    s.onerror=function(){
+      if(done)return;
+      done=true;
+      clearTimeout(timer);
+      reject(new Error("加载失败："+src));
+    };
+    s.src=src;
+    document.head.appendChild(s);
+  });
+}
+
+async function loadFirebaseSdk(){
+  if(window.firebase&&firebase.initializeApp&&firebase.database)return;
+  await loadScript("https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js");
+  await loadScript("https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js");
+}
+
+function readSyncCache(){
+  try{
+    var raw=localStorage.getItem(SYNC_CACHE_KEY);
+    if(!raw)return null;
+    var parsed=JSON.parse(raw);
+    if(!parsed||parsed.cycleKey!==syncCycleKey())return null;
+    return parsed;
+  }catch(e){return null}
+}
+
+function writeSyncCache(data){
+  try{localStorage.setItem(SYNC_CACHE_KEY,JSON.stringify(data))}catch(e){}
+}
+
+function buildLiveSync(meta, weekData){
+  var projects=[];
+  weekData.struct.forEach(function(obj,idx){
+    var krIds=obj.krIds||[];
+    var total=0;
+    var tasks=[];
+    krIds.forEach(function(kid){
+      var kr=weekData.krs[kid];
+      if(!kr)return;
+      total+=kr.pct||0;
+      tasks.push({title:kr.title||"",owner:kr.owner||"",pct:Math.round(kr.pct||0),status:kr.status||"",thisWeek:kr.thisWeek||""});
+    });
+    projects.push({id:"O"+(idx+1),title:obj.title||"",progress:krIds.length?Math.round(total/krIds.length):0,tasks:tasks});
+  });
+  return {cycleKey:syncCycleKey(),fetchedAt:Date.now(),week:meta.weekList[meta.weekList.length-1],label:syncLabel(meta.weekList[meta.weekList.length-1]),projects:projects};
+}
+
+function buildLocalSyncFromSnapshot(data){
+  if(!data||!data.rows||!data.rows.length)throw new Error("本地快照为空");
+  var weeks=data.coverage&&data.coverage.weeks?data.coverage.weeks:[];
+  var latestLabel=weeks[weeks.length-1]||"";
+  var latestWeek=latestLabel.split(" ")[0];
+  var latestDate=data.coverage&&data.coverage.latestDate?data.coverage.latestDate:"";
+  var rows=data.rows.filter(function(r){
+    return (latestWeek&&r.week===latestWeek)||(!latestWeek&&latestDate&&r.date===latestDate);
+  });
+  if(!rows.length)throw new Error("未找到本地最新周数据");
+  var map={};
+  rows.forEach(function(r){
+    var pid=r.projectId||"O_unknown";
+    if(!map[pid]){
+      map[pid]={id:pid,title:r.projectTitle||pid,progress:0,hasProgress:false,tasks:[],_progressTotal:0,_progressCount:0};
+    }
+    var pct=Number(r.progress||0);
+    var projectPct=Number(r.projectProgress||0);
+    if(projectPct>0){
+      map[pid].progress=Math.round(projectPct);
+      map[pid].hasProgress=true;
+    }else if(pct>0){
+      map[pid]._progressTotal+=pct;
+      map[pid]._progressCount+=1;
+      map[pid].hasProgress=true;
+    }
+    map[pid].tasks.push({
+      title:r.task||"",
+      owner:r.owner||"",
+      pct:pct>0?Math.round(pct):null,
+      status:r.status||"",
+      thisWeek:r.thisWeek||""
+    });
+  });
+  var projects=Object.keys(map).sort(function(a,b){
+    return Number(a.replace(/\D/g,""))-Number(b.replace(/\D/g,""));
+  }).map(function(pid){
+    var p=map[pid];
+    if(!p.progress&&p._progressCount)p.progress=Math.round(p._progressTotal/p._progressCount);
+    delete p._progressTotal;
+    delete p._progressCount;
+    return p;
+  });
+  return {
+    cycleKey:syncCycleKey(),
+    fetchedAt:Date.now(),
+    week:latestWeek,
+    label:latestLabel||latestWeek,
+    sourceName:"本地快照",
+    syncDetail:"从 data/current-okr.json 读取；同步范围：最新周报摘要，不覆盖没有进度字段的项目进度。",
+    projects:projects
+  };
+}
+
+function applyLiveSync(live, fromCache){
+  if(!live||!live.projects||!live.projects.length)return;
+  var progressTotal=0;
+  var progressCount=0;
+  live.projects.forEach(function(p){
+    var g=ROADMAP_DATA.find(function(x){return x.id===p.id});
+    if(!g)return;
+    if(p.hasProgress!==false&&typeof p.progress==="number"){
+      g.progress=p.progress;
+      progressTotal+=p.progress;
+      progressCount+=1;
+    }
+    g.liveTitle=p.title;
+    g.liveWeek=live.label;
+    g.liveSource=live.sourceName||"在线周报";
+    p.tasks.forEach(function(t,ti){
+      var sub=g.subs[ti];
+      if(!sub)return;
+      sub.liveStatus=t.pct==null?(t.status||"最新进展"):t.pct+"%";
+      sub.liveText=t.thisWeek;
+      sub.liveTask=t.title;
+    });
+  });
+  if(progressCount)SCOREBOARD.avgProgress=Math.round(progressTotal/progressCount)+"%";
+  renderRoadmap();
+  setSyncStatus("已同步"+(live.sourceName||"在线周报")+" "+live.label+"。", live.syncDetail||((fromCache?"使用本周三周期缓存；":"本周三周期首次从 Firebase 读取；")+"同步范围：项目进度、子项目状态和最新周报摘要。"));
+}
+
+async function loadLocalRoadmapSnapshot(){
+  try{
+    var resp=await fetch("./data/current-okr.json");
+    if(!resp.ok)throw new Error("HTTP "+resp.status);
+    var data=await resp.json();
+    applyLiveSync(buildLocalSyncFromSnapshot(data),false);
+    return true;
+  }catch(e){}
+  try{
+    if(!window.OKR_LOCAL_DATA)await loadScript("./data/current-okr.js");
+    if(!window.OKR_LOCAL_DATA)throw new Error("本地快照变量未定义");
+    applyLiveSync(buildLocalSyncFromSnapshot(window.OKR_LOCAL_DATA),false);
+    return true;
+  }catch(e2){
+    return false;
+  }
+}
+
+async function syncRoadmapFromTracker(){
+  var localApplied=await loadLocalRoadmapSnapshot();
+  if(localApplied&&window.location.protocol!=="https:")return;
+  var cached=readSyncCache();
+  if(cached){
+    applyLiveSync(cached,true);
+    return;
+  }
+  try{
+    setSyncStatus("正在检查在线周报最新进展。","按每周三节奏刷新；同一周三周期内复用缓存，不做轮询。");
+    await loadFirebaseSdk();
+    if(!firebase.apps||!firebase.apps.length)firebase.initializeApp(firebaseConfig);
+    var db=firebase.database();
+    var metaSnap=await db.ref("okr/meta").once("value");
+    var meta=metaSnap.val();
+    if(!meta||!meta.weekList)throw new Error("未找到周报元数据");
+    meta.weekList=fixArr(meta.weekList);
+    var latest=meta.weekList[meta.weekList.length-1];
+    var weekSnap=await db.ref("okr/weeks/"+latest).once("value");
+    var weekData=fixWeekData(weekSnap.val());
+    if(!weekData)throw new Error("未找到最新周数据");
+    var live=buildLiveSync(meta,weekData);
+    writeSyncCache(live);
+    applyLiveSync(live,false);
+  }catch(e){
+    if(localApplied)setSyncStatus("已显示本地快照最新进展。","在线 Firebase 暂时无法同步，原因："+e.message+"；不会反复重试。");
+    else setSyncStatus("在线周报暂时无法同步，当前展示静态路线图。","原因："+e.message+"；不会反复重试。");
+  }
+}
+
+function renderRoadmap(){
+  var sb=document.getElementById('scoreboard');
+  sb.innerHTML='<div class="score"><b>'+SCOREBOARD.projects+'</b><span>重点项目</span></div>'+
+    '<div class="score"><b>3</b><span>已有进展月份：'+SCOREBOARD.months+'</span></div>'+
+    '<div class="score"><b>'+SCOREBOARD.avgProgress+'</b><span>最新项目平均进度</span></div>'+
+    '<div class="score"><b>2</b><span>需要重点关注：'+SCOREBOARD.focus+'</span></div>';
+
+  var rm=document.getElementById('roadmap');
+  var h='';
+  ROADMAP_DATA.forEach(function(g){
+    h+='<article class="group"><header class="group-head">';
+    h+='<div class="group-title"><span class="id">'+g.id+'</span><h2>'+g.title+'</h2></div>';
+    h+='<p class="group-story">'+esc(g.story)+(g.liveWeek?'<br><span style="color:#686d73">'+esc(g.liveSource||"在线周报")+'：'+esc(g.liveWeek)+' · '+esc(g.liveTitle||"")+'</span>':'')+'</p>';
+    h+='<div class="group-focus"><span class="badge '+g.badge+'-badge">'+g.badgeText+'</span>';
+    h+='<div class="progress"><div class="progress-top"><span>当前进度</span><b>'+g.progress+'%</b></div>';
+    h+='<div class="bar" style="--value:'+g.progress+'%"><i></i></div></div></div></header>';
+
+    g.subs.forEach(function(s){
+      h+='<div class="subrow">';
+      h+='<div class="subname"><b>'+esc(s.name)+'</b><span>'+esc(s.liveStatus||s.status)+'</span></div>';
+      h+='<div class="mcell"><strong>'+esc(s.m3.title)+'</strong><p>'+esc(s.m3.text)+'</p></div>';
+      h+='<div class="mcell"><strong>'+esc(s.m4.title)+'</strong><p>'+esc(s.m4.text)+'</p></div>';
+      h+='<div class="mcell"><strong>'+esc(s.m5.title)+'</strong><p>'+esc(s.m5.text)+'</p>';
+      if(s.liveText)h+='<div class="sync-note"><b>最新周报 · '+esc(s.liveTask||s.name)+'</b><span>'+esc(s.liveText)+'</span></div>';
+      h+='</div>';
+      h+='<div class="future-cell"><div class="future-ticks"><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span><span>11</span><span>12</span></div><p>'+s.future+'</p></div>';
+      h+='<div class="judge"><span class="badge '+s.judge.badge+'-badge">'+s.judge.text+'</span><p>'+s.judge.note+'</p></div>';
+      h+='</div>';
+    });
+    h+='</article>';
+  });
+  rm.innerHTML=h;
+}
+
+renderRoadmap();
+syncRoadmapFromTracker();
+</script>
+</body>
+</html>

@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>OKR 项目鱼骨进展图</title>
+  <style>
+    :root{
+      --bg:#f6f4ee;
+      --paper:#fffefa;
+      --ink:#202124;
+      --muted:#686d73;
+      --line:#d8d2c5;
+      --soft:#ece7dc;
+      --blue:#235e9d;
+      --green:#147755;
+      --amber:#9a650f;
+      --red:#a33b3b;
+      --shadow:0 18px 48px rgba(34,33,28,.08);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      color:var(--ink);
+      background:linear-gradient(180deg,#fffdf8 0,var(--bg) 300px);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    }
+    .topnav{
+      position:sticky;top:0;z-index:20;
+      min-height:42px;
+      display:flex;align-items:center;gap:10px;
+      padding:0 18px;
+      background:rgba(255,253,248,.92);
+      border-bottom:1px solid var(--line);
+      backdrop-filter:blur(12px);
+      font-size:13px;
+    }
+    .topnav a{color:var(--blue);font-weight:760;text-decoration:none}
+    main{width:min(1500px,calc(100% - 36px));margin:0 auto;padding:34px 0 58px}
+    .hero{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 360px;
+      gap:24px;
+      align-items:end;
+      padding-bottom:22px;
+      border-bottom:1px solid var(--line);
+    }
+    h1{margin:0 0 10px;font-size:clamp(34px,4vw,60px);line-height:1.05;letter-spacing:0}
+    .lead{max-width:900px;margin:0;color:var(--muted);font-size:15px;line-height:1.75}
+    .stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .stat{padding:14px 15px;background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow)}
+    .stat b{display:block;font-size:28px;line-height:1}
+    .stat span{display:block;margin-top:6px;color:var(--muted);font-size:12px;line-height:1.45}
+    .legend{
+      display:grid;
+      grid-template-columns:repeat(5,minmax(0,1fr));
+      gap:10px;
+      margin:20px 0 22px;
+    }
+    .legend div{padding:10px 12px;background:var(--soft);border:1px solid var(--line);font-size:12px;color:var(--muted);line-height:1.5}
+    .legend b{display:block;color:var(--ink);font-size:13px}
+    .fish-list{display:grid;gap:18px}
+    .fish{
+      position:relative;
+      display:grid;
+      grid-template-columns:260px minmax(0,1fr) 250px;
+      gap:0;
+      min-height:250px;
+      background:var(--paper);
+      border:1px solid var(--line);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .fish-head{
+      padding:18px 18px 16px;
+      background:#fbf8f0;
+      border-right:1px solid var(--line);
+      display:grid;
+      align-content:start;
+      gap:10px;
+    }
+    .pid{
+      display:inline-grid;place-items:center;
+      width:46px;height:46px;
+      color:#fff;background:var(--blue);
+      border-radius:6px;
+      font-weight:840;
+      font-variant-numeric:tabular-nums;
+    }
+    .fish h2{margin:0;font-size:22px;line-height:1.25;letter-spacing:0}
+    .summary{margin:0;color:var(--muted);font-size:13px;line-height:1.65}
+    .tag{
+      width:max-content;
+      max-width:100%;
+      padding:6px 9px;
+      border:1px solid var(--line);
+      background:#fff;
+      color:var(--muted);
+      font-size:12px;font-weight:760;
+    }
+    .leadtag{color:var(--green);background:rgba(20,119,85,.08);border-color:rgba(20,119,85,.35)}
+    .watchtag{color:var(--amber);background:rgba(154,101,15,.08);border-color:rgba(154,101,15,.35)}
+    .risktag{color:var(--red);background:rgba(163,59,59,.08);border-color:rgba(163,59,59,.35)}
+    .spine{
+      position:relative;
+      padding:28px 22px 22px;
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:14px;
+      align-content:center;
+    }
+    .spine:before{
+      content:"";
+      position:absolute;
+      left:32px;right:32px;top:50%;
+      height:3px;
+      background:linear-gradient(90deg,var(--blue),#7b8794);
+      transform:translateY(-50%);
+      z-index:0;
+    }
+    .stage{
+      position:relative;
+      z-index:1;
+      min-height:180px;
+      display:grid;
+      grid-template-rows:auto 1fr;
+      gap:10px;
+      padding-top:4px;
+    }
+    .bone{
+      position:relative;
+      min-height:76px;
+      padding:12px 12px 12px 14px;
+      background:#fff;
+      border:1px solid var(--line);
+    }
+    .stage:nth-child(odd){align-self:start}
+    .stage:nth-child(even){align-self:end}
+    .stage:nth-child(odd) .bone:after{
+      content:"";
+      position:absolute;left:50%;bottom:-40px;
+      width:2px;height:40px;
+      background:var(--line);
+      transform:rotate(-28deg);
+      transform-origin:top;
+    }
+    .stage:nth-child(even) .bone:after{
+      content:"";
+      position:absolute;left:50%;top:-40px;
+      width:2px;height:40px;
+      background:var(--line);
+      transform:rotate(28deg);
+      transform-origin:bottom;
+    }
+    .month{
+      display:inline-flex;
+      width:max-content;
+      padding:4px 8px;
+      color:#fff;
+      background:var(--blue);
+      border-radius:4px;
+      font-size:12px;
+      font-weight:820;
+    }
+    .bone h3{margin:8px 0 6px;font-size:15px;line-height:1.3}
+    .bone p{margin:0;color:#464b50;font-size:13px;line-height:1.62}
+    .goal{
+      position:relative;
+      padding:22px 18px;
+      background:#f8f5ec;
+      border-left:1px dashed #a99f8f;
+      display:grid;
+      align-content:center;
+      gap:10px;
+    }
+    .goal:before{
+      content:"";
+      position:absolute;
+      left:-34px;top:50%;
+      width:34px;
+      border-top:3px dashed #9b9488;
+    }
+    .goal b{font-size:16px;line-height:1.35}
+    .goal p{margin:0;color:var(--muted);font-size:13px;line-height:1.65}
+    .goal .marker{
+      display:inline-flex;
+      width:max-content;
+      padding:5px 8px;
+      color:#fff;background:var(--green);
+      border-radius:4px;
+      font-size:12px;font-weight:820;
+    }
+    .foot{margin-top:18px;color:var(--muted);font-size:12px;line-height:1.7}
+    @media (max-width:1180px){
+      .hero{grid-template-columns:1fr}
+      .legend{grid-template-columns:1fr 1fr}
+      .fish{grid-template-columns:1fr}
+      .fish-head{border-right:0;border-bottom:1px solid var(--line)}
+      .goal{border-left:0;border-top:1px dashed #a99f8f}
+      .goal:before{display:none}
+    }
+    @media (max-width:780px){
+      main{width:min(100% - 24px,1500px);padding-top:22px}
+      .stats,.legend{grid-template-columns:1fr}
+      .spine{grid-template-columns:1fr;padding:18px}
+      .spine:before{display:none}
+      .stage{min-height:auto;display:block}
+      .stage:nth-child(odd),.stage:nth-child(even){align-self:auto}
+      .stage:nth-child(odd) .bone:after,.stage:nth-child(even) .bone:after{display:none}
+    }
+  </style>
+</head>
+<body>
+  <nav class="topnav">
+    <a href="./index.html">← 工作台</a>
+    <span>·</span>
+    <a href="./tracker.html">周报编辑</a>
+    <span>·</span>
+    <a href="./executive-roadmap.html">高层路线图</a>
+  </nav>
+  <main>
+    <section class="hero">
+      <div>
+        <h1>OKR 项目鱼骨进展图</h1>
+        <p class="lead">每个项目收敛为一条主干，把所有子项目合并成 3-6 月最核心的阶段工作，并用虚线延伸到年底应达成的成果。</p>
+      </div>
+      <div class="stats">
+        <div class="stat"><b>8</b><span>重点项目</span></div>
+        <div class="stat"><b>4</b><span>已记录月份</span></div>
+        <div class="stat"><b>1</b><span>每项目一条主线</span></div>
+        <div class="stat"><b>12月</b><span>虚线目标</span></div>
+      </div>
+    </section>
+    <section class="legend">
+      <div><b>3月</b>定方向，识别问题和场景。</div>
+      <div><b>4月</b>做成型，输出 Demo / 低保真 / 高保真。</div>
+      <div><b>5月</b>抓落地，材料、验证、版本承接。</div>
+      <div><b>6月</b>看信号，按 W25 周报判断当前推进。</div>
+      <div><b>年底</b>虚线目标，不是已完成状态。</div>
+    </section>
+    <div id="fishList" class="fish-list"></div>
+    <p class="foot">整理口径：合并同一项目内所有子项目，只保留每月最核心的推进逻辑。年底目标为基于当前项目方向的归纳表达，用虚线表示待达成。</p>
+  </main>
+  <script>
+var PROJECTS=[
+  {id:"O1",title:"零负担智慧家庭能源管理体验",tag:"需聚焦",tone:"watchtag",summary:"从业主侧智慧交互扩展到安装商、工商业和品牌范式，当前关键是收敛主线并完成 930 落地表达。",
+    stages:[
+      ["3月","场景起盘","业主全流程 GUI、安装商售前/开局、工商业开通和宣传材料同步起步，先把智慧能源体验的关键触点找全。"],
+      ["4月","方案成型","电价、此刻、日报进入高保真；安装商销售流程串联；视频、调研、订阅收费和设计工具形成初步方案。"],
+      ["5月","材料收口","核心材料完成，930 光储充热高保真推进；安装商调研短暂停滞；展示视频、Demo 和订阅工具需要资源取舍。"],
+      ["6月","版本与品牌对齐","源网荷储已交付，光储充热和情景卡片继续高保真；智慧品牌范式、QCC 材料、设计工具和 930 需求一起收口。"]
+    ],
+    goal:["年底成果","形成一套可落地、可展示、可复用的业主 + 安装商智慧能源体验范式，并在 930 版本和对外材料中闭环。"]},
+  {id:"O2",title:"预测性电站运维体验",tag:"稳步推进",tone:"leadtag",summary:"健康卫士和计划曲线已成为可展示样板，下一步是把展示成果变成版本功能和客户反馈闭环。",
+    stages:[
+      ["3月","能力边界收敛","健康卫士、调度方案和下一代运维 Agent 同时定边界，明确从事后排障前移到主动诊断。"],
+      ["4月","Demo 与视频成型","光伏/储能/构网卫士关键页面、展会视频和计划曲线 Demo 推进，交易场景收敛为辅助表达。"],
+      ["5月","展会成果输出","健康卫士视频和 Demo 输出完毕；计划曲线继续对齐 MO 和三方工作量；V3 储能箱、通信拓扑等落地需求进入评审。"],
+      ["6月","接入 930 增量","健康卫士方案刷新并输出 InterSolar 物料；计划曲线、储能可用能量预测和预警增量开始进入版本承接。"]
+    ],
+    goal:["年底成果","把健康卫士、计划曲线和关键监控需求转成可验证的海外局点样板和 930 版本能力。"]},
+  {id:"O3",title:"主动运维与 AI 故障诊断",tag:"进展领先",tone:"leadtag",summary:"项目已完成从概念到 Q3 范围的收敛，重点转向主动诊断范式、OTA 可视化和客户验证。",
+    stages:[
+      ["3月","主动运维概念成型","AI 故障诊断、无感 OTA、可视化监控和充电运维分别起盘，建立从被动响应到主动预防的方向。"],
+      ["4月","范式沉淀","故障诊断结合思维链和 cowork 模式演进；OTA 完成端到端方案；重卡超充价值被筛掉，AI 光储充开通进入高保真。"],
+      ["5月","Q3 范围收敛","主动预警、决策树、根因分析和业主 App 最小影响 OTA 进入 Q3 候选；AI 光储充高保真交付，充电平台规范拉齐。"],
+      ["6月","验证准备","完成德总对标并修改材料，客户交流待启动，L3-AI 场景开始识别。"]
+    ],
+    goal:["年底成果","沉淀主动运维设计范式，并让 AI 诊断、OTA 可视化和充电主动运维至少进入一个可评审版本链路。"]},
+  {id:"O4",title:"官网数智化销售作战平台",tag:"需业务牵引",tone:"watchtag",summary:"销售助手已进入内测，但平台价值取决于真实销售任务、客户样本和收益报告等高频场景。",
+    stages:[
+      ["3月","销售助手起步","搭知识库、导购报告和深访大纲，先验证官网从展示页变销售作战平台的可能性。"],
+      ["4月","Demo 与样例成型","完成多轮对话、泰国收益报告、创新 Demo 和 JDC 用户筛选，为访谈准备材料。"],
+      ["5月","真实反馈输入","JDC 用户反馈指出输入复杂、视觉氛围、品牌信任等关键问题；业务需求偏少，方案需要重新对齐。"],
+      ["6月","进入内测与专项化","现网助手进入内测，计划 7 月中国区上线；SNEC 用户测试给出视觉体验 8.8 分，收益报告进入重点特性规划。"]
+    ],
+    goal:["年底成果","形成可上线的智能销售助手和收益报告能力，并把访谈洞察转成官网转化链路的稳定需求池。"]},
+  {id:"O5",title:"小艺知识问答垂域体验",tag:"标杆项目",tone:"leadtag",summary:"从 Demo 到 skill、模板、专利和版本入口，已形成较完整的设计牵引工具链。",
+    stages:[
+      ["3月","能力体系起盘","PPT 质量改造、垂域回复、互动学习和自然语言创作同步启动，识别内容生成链路的设计发力点。"],
+      ["4月","工具链成型","内容规划 skill、视觉样式 skill、DNA 模板、交互式学习高保真和深度研究可视可控方案进入开发/评审。"],
+      ["5月","资产扩展","DNA 模板开发集成并验证，10+ 风格模板生成；互动学习进入 UXD-DMG，专利通过；自然语言创作等待平台范式统一。"],
+      ["6月","暂无细分增量","W25 快照只保留“创新专项”栏目，未记录具体子项增量，项目仍按 5 月的工具链和版本入口推进。"]
+    ],
+    goal:["年底成果","把 PPT 生成、交互式学习和自然语言创作沉淀为可规模化复用的垂域体验能力。"]},
+  {id:"O6",title:"乾崑智驾一站式体验 APP",tag:"方向收敛中",tone:"watchtag",summary:"从单点页面优化扩展到首页、我的、展厅、购车和助手，当前要把创新点统一到一站式体验定位。",
+    stages:[
+      ["3月","整体方向启动","VR 泊车、展车页面、“我的”改版和整体规划启动，先明确一站式体验的空间。"],
+      ["4月","页面方案扩展","商城、智能助手、展厅、“我的”和启境购车陆续输出，范围从页面优化扩展到潜客转化。"],
+      ["5月","定位继续收敛","首页和“我的”已与业务对齐，可快速落地；探索、展厅、购车、助手继续梳理智能化卖点。"],
+      ["6月","补齐汇报方案","整理汇报 PPT，补齐创新方案，准备与业务完整过一遍。"]
+    ],
+    goal:["年底成果","形成围绕潜客转化、展厅探索、购车助手和车主运营的一站式 APP 体验方案，并推动短期页面先落地。"]},
+  {id:"O7",title:"NetEco 站点运维体验重构",tag:"验证扎实",tone:"leadtag",summary:"价值在于用户验证和规范化承接，6 月已扩展到 930 场景、数据中心和 L3/L4 规范系统。",
+    stages:[
+      ["3月","旅程与架构起盘","完成 L2 用户旅程和 After 架构一版，输出重构探索 Demo。"],
+      ["4月","低保真与用户验证","站点列表、单站概览、锂电池详情完成两轮评审，南非、广东、安徽等用户基本认可方案。"],
+      ["5月","高保真和报告闭环","列表、概览高保真闭环；6 位用户访谈报告完成；首页、告警、报表、建站和数字孪生进入讨论。"],
+      ["6月","930 场景与规范承接","工作台、单站、建站三个 930 场景与 SE 对齐；UPS/AIDC 输出；L3 页面、任务和 L4 天眼/天工助手开始规范化推进。"]
+    ],
+    goal:["年底成果","形成经过用户验证的站点运维重构方案，并把 930 场景和 L3/L4 规范系统转成可复用平台能力。"]},
+  {id:"O8",title:"数据中心高品质创新产品",tag:"需澄清口径",tone:"risktag",summary:"已有 DMaaS、锂电大屏和 TMU 健康报告产出，但项目管理口径和产品牵引仍需补齐。",
+    stages:[
+      ["3月","单点成果已有","DMaaS 维保提醒和一键续保已交付，但 630 需求仍待澄清。"],
+      ["4月","多方向出现","DMaaS 数据、水质告警、TMU 接入和锂电故障预测大屏并行推进，锂电大屏高保真完成。"],
+      ["5月","健康报告接入","锂电作战大屏按评审意见修改，TMU 健康报告低保真完成并进入高保真。"],
+      ["6月","暂无新增记录","W25 快照未记录 O8 独立增量，说明需要先明确项目评价口径和后续规划牵引。"]
+    ],
+    goal:["年底成果","把数据中心创新从零散需求整理成清晰产品规划，明确 DMaaS、锂电大屏和健康报告的版本路径。"]}
+];
+
+function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+function render(){
+  document.getElementById("fishList").innerHTML=PROJECTS.map(function(p){
+    var stages=p.stages.map(function(s){
+      return '<article class="stage"><div class="bone"><span class="month">'+esc(s[0])+'</span><h3>'+esc(s[1])+'</h3><p>'+esc(s[2])+'</p></div></article>';
+    }).join("");
+    return '<section class="fish" id="'+p.id+'"><aside class="fish-head"><span class="pid">'+p.id+'</span><h2>'+esc(p.title)+'</h2><p class="summary">'+esc(p.summary)+'</p><span class="tag '+p.tone+'">'+esc(p.tag)+'</span></aside><div class="spine">'+stages+'</div><aside class="goal"><span class="marker">年底成果</span><b>12月目标</b><p>'+esc(p.goal[1])+'</p></aside></section>';
+  }).join("");
+}
+render();
+  </script>
+</body>
+</html>
