@@ -2,187 +2,97 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
-  <title>团队 OKR 工作台</title>
+  <title>团队 OKR 实时进展</title>
   <style>
-    :root {
-      --bg: #f7f6f1;
-      --ink: #202124;
-      --muted: #686d73;
-      --line: #d9d4c8;
-      --panel: #fffefa;
-      --soft: #ece7dc;
-      --blue: #235e9d;
-      --green: #147755;
-      --amber: #9a650f;
-      --shadow: 0 18px 48px rgba(34, 33, 28, .08);
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      color: var(--ink);
-      background: linear-gradient(180deg, #fffdf8 0, var(--bg) 260px);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-    }
-
-    main {
-      width: min(1040px, calc(100% - 36px));
-      margin: 0 auto;
-      padding: 40px 0 54px;
-    }
-
-    header {
-      padding-bottom: 20px;
-      border-bottom: 1px solid var(--line);
-    }
-
-    h1 {
-      margin: 0 0 10px;
-      font-size: clamp(30px, 4vw, 48px);
-      line-height: 1.05;
-    }
-
-    .lead {
-      max-width: 760px;
-      margin: 0;
-      color: var(--muted);
-      font-size: 15px;
-      line-height: 1.7;
-    }
-
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 16px;
-      margin: 24px 0;
-    }
-
-    .card {
-      min-height: 230px;
-      display: grid;
-      align-content: space-between;
-      gap: 20px;
-      padding: 22px;
-      color: inherit;
-      text-decoration: none;
-      background: var(--panel);
-      border: 1px solid var(--line);
-      box-shadow: var(--shadow);
-      transition: transform .18s ease, border-color .18s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-2px);
-      border-color: #bdb6a8;
-    }
-
-    .card small {
-      width: fit-content;
-      padding: 5px 9px;
-      color: var(--blue);
-      background: rgba(35, 94, 157, .1);
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 760;
-    }
-
-    .card h2 {
-      margin: 12px 0 8px;
-      font-size: 25px;
-      line-height: 1.2;
-    }
-
-    .card p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.65;
-    }
-
-    .arrow {
-      color: var(--green);
-      font-weight: 760;
-      font-size: 14px;
-    }
-
-    .meta {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 12px;
-    }
-
-    .meta div {
-      padding: 14px;
-      background: var(--soft);
-      border: 1px solid var(--line);
-    }
-
-    .meta b {
-      display: block;
-      margin-bottom: 5px;
-      font-size: 20px;
-    }
-
-    .meta span {
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.5;
-    }
-
-    footer {
-      margin-top: 22px;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.7;
-    }
-
-    @media (max-width: 760px) {
-      .cards,
-      .meta {
-        grid-template-columns: 1fr;
-      }
-    }
+    :root{--bg:#f6f4ef;--panel:#fff;--ink:#1f2523;--muted:#66706b;--line:#ded9ce;--teal:#0f766e;--blue:#2557a7;--red:#b42318;--amber:#9a650f;--shadow:0 18px 50px rgba(31,37,35,.08)}
+    *{box-sizing:border-box}
+    body{min-width:320px;margin:0;color:var(--ink);background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+    a{color:inherit;text-decoration:none}
+    main{width:min(1180px,100%);margin:0 auto;padding:24px clamp(14px,3vw,36px) 54px}
+    header{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;padding:14px 0 22px;border-bottom:1px solid var(--line)}
+    h1,h2,h3,p{margin:0} h1{font-size:clamp(30px,4vw,50px);line-height:1.08} h2{font-size:clamp(23px,3vw,36px)} h3{font-size:15px;line-height:1.45}
+    .eyebrow{margin-bottom:6px;color:#115e59;font-size:12px;font-weight:750}
+    nav{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
+    nav a,.refresh{display:inline-flex;min-height:36px;align-items:center;border:1px solid var(--line);border-radius:8px;background:#fff;padding:0 12px;color:var(--muted);font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+    .overview{margin-top:24px;border:1px solid var(--line);border-radius:8px;background:var(--panel);box-shadow:var(--shadow)}
+    .overview-head{display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid var(--line);padding:20px}
+    .metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line)}
+    .metric{display:grid;min-height:88px;align-content:center;background:#fbfaf7;padding:15px 20px}
+    .metric strong{font-size:28px}.metric span{color:var(--muted);font-size:12px}.metric.attention strong{color:var(--red)}
+    .projects{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:18px}
+    .project{min-width:0;border:1px solid var(--line);border-radius:8px;background:#fdfbf7;padding:16px}
+    .project-head,.project-title,.task-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+    .project-title{min-width:0;justify-content:flex-start}.project-title span{border-radius:6px;background:#eef2ff;padding:4px 7px;color:var(--blue);font-size:11px;font-weight:800}
+    .project-title h3{min-width:0;overflow-wrap:anywhere}.project-head>strong{flex:0 0 auto;color:#115e59;font-size:22px}
+    .track{overflow:hidden;height:7px;margin:14px 0 8px;border-radius:999px;background:#e4dfd5}.track span{display:block;height:100%;border-radius:inherit;background:var(--teal)}
+    .fill{color:var(--muted);font-size:12px}.tasks{display:grid;gap:8px;margin:14px 0 0;padding:0;list-style:none}.tasks li{min-width:0;border-top:1px solid var(--line);padding-top:10px}
+    .task-head strong{min-width:0;overflow-wrap:anywhere;font-size:13px}.task-head span{flex:0 0 auto;border-radius:999px;padding:3px 7px;font-size:11px;font-weight:800}
+    .tasks .filled .task-head span{background:#e8f4ef;color:#115e59}.tasks .missing .task-head span{background:#fff0ed;color:var(--red)}
+    .tasks p,.tasks small{display:block;margin-top:6px;color:var(--muted);font-size:12px;line-height:1.5;overflow-wrap:anywhere}.tasks .missing p{color:var(--amber)}
+    .state{padding:28px;color:var(--muted);line-height:1.7}.state.error{color:var(--red)}
+    .note{margin-top:18px;border:1px solid var(--line);border-radius:8px;background:#fff;padding:14px;color:var(--muted);font-size:12px;line-height:1.6}
+    @media(max-width:760px){header,.overview-head{align-items:stretch;flex-direction:column}nav{justify-content:flex-start}.metrics,.projects{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
   <main>
     <header>
-      <h1>团队 OKR 工作台</h1>
-      <p class="lead">整合版项目：保留原来的周报协作编辑工具，同时加入面向高层汇报的年度路线图。当前数据已保存为本地快照，后续可直接部署到静态服务器。</p>
+      <div><p class="eyebrow">GitHub Pages 备用入口</p><h1>团队 OKR 实时进展</h1></div>
+      <nav aria-label="页面导航">
+        <a href="./tracker.html">填写周报</a>
+        <a href="./feedback.html">产品建议</a>
+        <a href="https://okr-weekly-workbench.leodong.chatgpt.site/progress">正式入口</a>
+      </nav>
     </header>
-
-    <section class="cards">
-      <a class="card" href="./tracker.html">
-        <div>
-          <small>周报编辑</small>
-          <h2>OKR 周报追踪工具</h2>
-          <p>原 Claude Code 项目，支持每周版本、关键任务编辑、进度对比、Firebase 实时保存和多人协作。</p>
-        </div>
-        <span class="arrow">打开 tracker.html</span>
-      </a>
-
-      <a class="card" href="./progress.html">
-        <div>
-          <small>统一进展</small>
-          <h2>项目路线图与鱼骨图</h2>
-          <p>已整合为一个视图：每个项目一条主线，同时呈现月度阶段、最新周报信号和年底目标。</p>
-        </div>
-        <span class="arrow">打开统一项目进展视图</span>
-      </a>
+    <section class="overview">
+      <div class="overview-head">
+        <div><p class="eyebrow">当前周 · Firebase 实时读取</p><h2 id="week-title">正在读取最新周...</h2></div>
+        <button class="refresh" type="button" onclick="loadProgress()">刷新</button>
+      </div>
+      <div id="content"><p class="state">正在连接周报数据，请稍候。</p></div>
     </section>
-
-    <section class="meta">
-      <div><b>W11-W25</b><span>当前保存的数据覆盖 2026-03-09 到 2026-06-16。</span></div>
-      <div><b>8 个项目</b><span>按 O1-O8 合并项目口径，避免历史命名变化造成拆分。</span></div>
-      <div><b>本地快照</b><span>数据保存在 data/current-okr.json 和原始 Excel 文件中。</span></div>
-    </section>
-
-    <footer>
-      部署时上传整个文件夹即可。若只需要静态高层汇报页，上传 index.html、executive-roadmap.html 和 data/ 目录即可。
-    </footer>
+    <p class="note">备用页只展示最新周执行状态；3—6 月历史路线图请在正式入口查看。若正式入口被 Cloudflare 拦截，周报填写和本页实时概览仍可继续使用。</p>
   </main>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script>
+    var firebaseConfig={apiKey:"AIzaSyCzQ81s_xCVQzhGrKKspjqaxIDlujvbmKc",authDomain:"family-sync-app-b3d51.firebaseapp.com",databaseURL:"https://family-sync-app-b3d51-default-rtdb.firebaseio.com",projectId:"family-sync-app-b3d51",storageBucket:"family-sync-app-b3d51.firebasestorage.app",messagingSenderId:"545912389388",appId:"1:545912389388:web:95de71d8248310b8821329"};
+    var database=null;
+    function fixArray(value){if(!value)return[];if(Array.isArray(value))return value;if(typeof value==='object')return Object.keys(value).sort(function(a,b){return Number(a)-Number(b)}).map(function(key){return value[key]});return[value]}
+    function escapeHtml(value){return String(value||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+    function weekLabel(week){var date=new Date(week+'T00:00:00Z');var thursday=new Date(date);thursday.setUTCDate(date.getUTCDate()+3-((date.getUTCDay()+6)%7));var first=new Date(Date.UTC(thursday.getUTCFullYear(),0,4));var number=1+Math.round(((thursday-first)/86400000-3+((first.getUTCDay()+6)%7))/7);return 'W'+number+' · '+week}
+    async function loadProgress(){
+      document.getElementById('content').innerHTML='<p class="state">正在连接周报数据，请稍候。</p>';
+      try{
+        if(!window.firebase||!firebase.database)throw new Error('Firebase SDK 未加载');
+        if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
+        database=database||firebase.database();
+        var meta=(await database.ref('okr/meta').once('value')).val()||{};
+        var weeks=fixArray(meta.weekList).filter(Boolean).sort(function(a,b){return Date.parse(a)-Date.parse(b)});
+        var latest=weeks[weeks.length-1];
+        if(!latest)throw new Error('没有可用周次');
+        var week=(await database.ref('okr/weeks/'+latest).once('value')).val();
+        if(!week)throw new Error('最新周数据为空');
+        render(latest,week);
+      }catch(error){document.getElementById('week-title').textContent='实时数据暂不可用';document.getElementById('content').innerHTML='<p class="state error">读取失败：'+escapeHtml(error.message)+'。请先打开周报填写页，或稍后重试。</p>'}
+    }
+    function render(latest,week){
+      var struct=fixArray(week.struct),krs=week.krs||{},total=0,filled=0;
+      var cards=struct.map(function(objective,index){
+        var ids=fixArray(objective.krIds),tasks=[],progress=0;
+        ids.forEach(function(id){var task=krs[id];if(!task)return;total++;progress+=Number(task.pct)||0;var current=String(task.thisWeek||'').trim();if(current)filled++;tasks.push({id:id,title:task.title||'未命名关键任务',owner:task.owner||'',progress:Math.max(0,Math.min(100,Number(task.pct)||0)),status:task.status||'',current:current,last:task.lastWeek||''})});
+        var average=tasks.length?Math.round(progress/tasks.length):0;
+        var filledInProject=tasks.filter(function(task){return task.current}).length;
+        var items=tasks.map(function(task){var text=task.current||(task.last?'上周：'+task.last:'暂无进展说明');return '<li class="'+(task.current?'filled':'missing')+'"><div class="task-head"><strong>'+escapeHtml(task.title)+'</strong><span>'+(task.current?'已更新':'待填写')+'</span></div><p>'+escapeHtml(text)+'</p><small>'+escapeHtml(task.owner||'负责人待补充')+' · '+task.progress+'%'+(task.status?' · '+escapeHtml(task.status):'')+'</small></li>'}).join('');
+        return '<article class="project"><div class="project-head"><div class="project-title"><span>'+String(index+1).padStart(2,'0')+'</span><h3>'+escapeHtml(objective.title||'重点工作')+'</h3></div><strong>'+average+'%</strong></div><div class="track"><span style="width:'+average+'%"></span></div><p class="fill">'+filledInProject+'/'+tasks.length+' 项已填写本周进展</p><ul class="tasks">'+items+'</ul></article>';
+      }).join('');
+      var missing=Math.max(0,total-filled);
+      document.getElementById('week-title').textContent=weekLabel(latest);
+      document.getElementById('content').innerHTML='<div class="metrics"><div class="metric"><strong>'+struct.length+'</strong><span>重点工作</span></div><div class="metric"><strong>'+total+'</strong><span>关键任务</span></div><div class="metric '+(missing?'attention':'')+'"><strong>'+filled+'/'+total+'</strong><span>本周进展已填写</span></div><div class="metric"><strong>'+missing+'</strong><span>仍待补充</span></div></div><div class="projects">'+cards+'</div>';
+    }
+    loadProgress();
+  </script>
 </body>
 </html>
