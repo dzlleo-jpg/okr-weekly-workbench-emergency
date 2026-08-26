@@ -70,6 +70,14 @@ h1{margin:0;font-size:clamp(30px,3.2vw,46px);line-height:1.08;font-weight:820;co
 .ta:hover:not(:focus){background:rgba(236,231,220,.36)}
 .ta.lw{color:#8f887c;font-style:italic;border-left-color:var(--line)}
 .ta.lw:focus{border-left-color:var(--gray3);background:#fff;color:var(--gray5);font-style:normal}
+.progress-items{display:grid;gap:7px;margin-top:6px}
+.progress-item-row{display:grid;grid-template-columns:20px minmax(0,1fr) 30px;gap:6px;align-items:start;padding:5px 6px;background:rgba(236,231,220,.34);border:1px solid transparent;border-radius:var(--radius-sm)}
+.progress-item-row:focus-within{border-color:rgba(35,94,157,.22);background:#fff}
+.progress-item-index{display:flex;align-items:center;justify-content:center;width:20px;height:20px;margin-top:7px;border-radius:50%;background:var(--soft);color:var(--muted);font-size:11px;font-weight:760}
+.progress-item{padding-inline:4px;border-left:0}.progress-item:focus{border-left-color:transparent}
+.progress-item-remove{width:28px;height:28px;margin-top:2px;border:0;background:transparent;color:var(--gray3);cursor:pointer;border-radius:var(--radius-sm);font-size:16px}
+.progress-item-remove:hover{background:rgba(164,64,54,.08);color:var(--red)}
+.progress-add{margin-top:7px;border:0;background:transparent;color:var(--blue);font:700 12px var(--font);cursor:pointer;padding:4px 0}.progress-add:hover{text-decoration:underline}
 
 /* kr list */
 .kl{margin-left:0;padding:0 16px 16px}
@@ -203,6 +211,7 @@ var firebaseConfig = {
 // ═══════════════════════════════════════
 
 var db = null;
+var FIREBASE_DATABASE_URL = firebaseConfig.databaseURL;
 var LOCAL_VIEW = null;
 var TRACKER_STATE_API = '/api/tracker-state';
 var TRACKER_STATE = null;
@@ -523,41 +532,9 @@ function loadScript(src){
   });
 }
 
-async function loadFirebaseSdk(){
-  if(window.firebase && firebase.initializeApp && firebase.database)return;
-  await loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
-  await loadScript('https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js');
-}
-
-function connectFirebase(){
-  document.getElementById('root').innerHTML='<div class="app loading">正在连接 Firebase...</div>';
-  var fallbackTimer = setTimeout(function(){
-    if(!db) showFirebaseLoadError();
-  }, 6000);
-  (async function boot(){
-    try{
-      await loadFirebaseSdk();
-    }catch(e){
-      clearTimeout(fallbackTimer);
-      showFirebaseLoadError();
-      return;
-    }
-    if(window.firebase && firebase.initializeApp && firebase.database){
-      try {
-        if(!firebase.apps || !firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        db = firebase.database();
-        clearTimeout(fallbackTimer);
-        init();
-      } catch(e) {
-        clearTimeout(fallbackTimer);
-        document.getElementById('root').innerHTML='<div class="app err">Firebase 初始化失败。<br><br>'+esc(e.message)+'</div>';
-      }
-      return;
-    }
-    clearTimeout(fallbackTimer);
-    showFirebaseLoadError();
-  })();
-}
+function firebaseRestUrl(path){return FIREBASE_DATABASE_URL+'/'+String(path||'').replace(/^\/+|\/+$/g,'')+'.json'}
+async function firebaseRest(path,method,value){var options={method:method||'GET',headers:{'accept':'application/json'}};if(value!==undefined){options.headers['content-type']='application/json';options.body=JSON.stringify(value)}var resp=await fetch(firebaseRestUrl(path),options);if(!resp.ok)throw new Error('Firebase HTTP '+resp.status);return method==='GET'||!method?await resp.json():true}
+function connectFirebase(){document.getElementById('root').innerHTML='<div class="app loading">正在读取本周协作数据...</div>';db={mode:'rest'};init()}
 
 function uid(){return Math.random().toString(36).slice(2,9)}
 function fmt(d){var t=new Date(d);return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0')}
@@ -570,6 +547,9 @@ function latestWeekIndex(wl){return Math.max(0,wl.length-1)}
 function moveItem(a,f,t){var r=a.slice();var x=r.splice(f,1)[0];r.splice(t,0,x);return r}
 function ah(el){if(!el)return;el.style.height='0';el.style.height=el.scrollHeight+'px'}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function progressItems(text){var items=String(text||'').replace(/\r/g,'').split('\n');return items.length?items:['']}
+function isPausedText(text){return /挂起|暂停|搁置/.test(String(text||''))}
+function isPausedTask(task,obj){return isPausedText(task&&task.title)||isPausedText(task&&task.status)||isPausedText(obj&&obj.title)}
 
 // Enter key blurs input/textarea
 function ek(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();e.target.blur()}}
@@ -588,22 +568,22 @@ function fixWeekData(wd){
 
 var debounceTimers={};
 function deb(k,fn,ms){clearTimeout(debounceTimers[k]);debounceTimers[k]=setTimeout(fn,ms||800)}
-function fbGet(path){return db?db.ref(path).once('value').then(function(s){return s.val()}):sitesGet(path)}
-function fbSet(path,val){return db?db.ref(path).set(val):sitesSet(path,val)}
+function fbGet(path){if(!db)return sitesGet(path);return firebaseRest(path,'GET').catch(function(){db=null;return sitesGet(path)})}
+function fbSet(path,val){return db?firebaseRest(path,'PUT',val):sitesSet(path,val)}
 function firebasePatch(patch){
-  if(patch.op==='krField')return db.ref('okr/weeks/'+patch.week+'/krs/'+patch.kid+'/'+patch.field).set(patch.value);
-  if(patch.op==='objectiveTitle')return db.ref('okr/weeks/'+patch.week+'/struct/'+patch.objectiveIndex+'/title').set(patch.value);
-  if(patch.op==='week')return db.ref('okr/weeks/'+patch.week).set(patch.weekState);
-  if(patch.op==='rollWeek')return db.ref('okr/weeks/'+patch.fromWeek).once('value').then(function(s){
-    var source=fixWeekData(s.val());
+  if(patch.op==='krField')return firebaseRest('okr/weeks/'+patch.week+'/krs/'+patch.kid+'/'+patch.field,'PUT',patch.value);
+  if(patch.op==='objectiveTitle')return firebaseRest('okr/weeks/'+patch.week+'/struct/'+patch.objectiveIndex+'/title','PUT',patch.value);
+  if(patch.op==='week')return firebaseRest('okr/weeks/'+patch.week,'PUT',patch.weekState);
+  if(patch.op==='rollWeek')return firebaseRest('okr/weeks/'+patch.fromWeek,'GET').then(function(raw){
+    var source=fixWeekData(raw);
     if(!source)throw new Error('找不到可继承的上一周周报。');
     var copy=JSON.parse(JSON.stringify(source));
     Object.keys(copy.krs||{}).forEach(function(kid){copy.krs[kid].lastWeek=copy.krs[kid].thisWeek||'';copy.krs[kid].thisWeek=''});
-    return db.ref().update({
+    return firebaseRest('','PATCH',{
       ['okr/weeks/'+patch.toWeek]:copy
-    }).then(function(){return db.ref('okr/meta/weekList').once('value')}).then(function(w){
-      var list=sortWeekList(fixArr(w.val()).concat([patch.toWeek]).filter(function(x,i,a){return a.indexOf(x)===i}));
-      return db.ref('okr/meta/weekList').set(list);
+    }).then(function(){return firebaseRest('okr/meta/weekList','GET')}).then(function(w){
+      var list=sortWeekList(fixArr(w).concat([patch.toWeek]).filter(function(x,i,a){return a.indexOf(x)===i}));
+      return firebaseRest('okr/meta/weekList','PUT',list);
     });
   });
   throw new Error('未知保存补丁。');
@@ -697,6 +677,9 @@ function saveWeekPatch(){
 // ── actions (text edits: no render; structural changes: render) ──
 function sw(idx){if(!S.meta||idx<0||idx>=S.meta.weekList.length)return;S.wi=idx;S.loading=true;render();loadWeek(S.meta.weekList,idx).then(function(){S.loading=false;render()})}
 function ukr(kid,f,v){S.wd.krs[kid][f]=v;savePatch(S.meta.weekList[S.wi]+'-'+kid+'-'+f,{op:'krField',week:S.meta.weekList[S.wi],kid:kid,field:f,value:v})}
+function updateProgressItem(kid,idx,value){var items=progressItems(S.wd.krs[kid].thisWeek);items[idx]=value;ukr(kid,'thisWeek',items.join('\n'))}
+function addProgressItem(kid,after){var items=progressItems(S.wd.krs[kid].thisWeek);items.splice(after+1,0,'');S.wd.krs[kid].thisWeek=items.join('\n');savePatch(S.meta.weekList[S.wi]+'-'+kid+'-thisWeek',{op:'krField',week:S.meta.weekList[S.wi],kid:kid,field:'thisWeek',value:S.wd.krs[kid].thisWeek});render();setTimeout(function(){var el=document.querySelector('[data-progress-item="'+kid+'-'+(after+1)+'"]');if(el){el.focus();ah(el)}},0)}
+function removeProgressItem(kid,idx){var items=progressItems(S.wd.krs[kid].thisWeek);if(items.length===1)items[0]='';else items.splice(idx,1);S.wd.krs[kid].thisWeek=items.join('\n');savePatch(S.meta.weekList[S.wi]+'-'+kid+'-thisWeek',{op:'krField',week:S.meta.weekList[S.wi],kid:kid,field:'thisWeek',value:S.wd.krs[kid].thisWeek});render()}
 function upct(kid,d){var kr=S.wd.krs[kid];kr.pct=Math.max(0,Math.min(100,kr.pct+d));savePatch(S.meta.weekList[S.wi]+'-'+kid+'-pct',{op:'krField',week:S.meta.weekList[S.wi],kid:kid,field:'pct',value:kr.pct});render()}
 function uot(oi,v){S.wd.struct[oi].title=v;savePatch(S.meta.weekList[S.wi]+'-objective-'+oi,{op:'objectiveTitle',week:S.meta.weekList[S.wi],objectiveIndex:oi,value:v})}
 function aobj(){var kid=uid();S.wd.krs[kid]={id:kid,title:'',owner:'',pct:0,status:'',thisWeek:'',lastWeek:''};S.wd.struct.push({id:uid(),title:'',krIds:[kid]});saveWeekPatch();render()}
@@ -806,10 +789,10 @@ function render(){
   h+='<button class="ar '+(isLast?'off':'')+'" onclick="sw('+(wi+1)+')">\u203a</button>';
   h+='<span style="font-size:12px;color:var(--gray3);margin:0 12px">|</span><span style="font-size:12px;color:var(--gray4)">'+m.weekList.length+' \u5468</span></div>';
 
-  var totalTasks=0,filledTasks=0;
-  struct.forEach(function(obj){(obj.krIds||[]).forEach(function(kid){var task=krs[kid];if(task){totalTasks++;if(String(task.thisWeek||'').trim())filledTasks++}})});
-  var missingTasks=Math.max(0,totalTasks-filledTasks);
-  h+='<div class="fill-summary '+(missingTasks?'needs-attention':'')+'"><strong>\u672c\u5468\u8fdb\u5c55 '+filledTasks+'/'+totalTasks+' \u5df2\u586b\u5199</strong><span>'+(missingTasks?'\u8fd8\u6709 '+missingTasks+' \u9879\u5f85\u8865\u5145\uff0c\u7a7a\u767d\u6846\u5df2\u6807\u51fa':'\u672c\u5468\u8fdb\u5c55\u5df2\u9f50\u5168')+'</span></div>';
+  var totalTasks=0,activeTasks=0,pausedTasks=0,filledTasks=0;
+  struct.forEach(function(obj){(obj.krIds||[]).forEach(function(kid){var task=krs[kid];if(task){totalTasks++;if(isPausedTask(task,obj)){pausedTasks++}else{activeTasks++;if(String(task.thisWeek||'').trim())filledTasks++}}})});
+  var missingTasks=Math.max(0,activeTasks-filledTasks);
+  h+='<div class="fill-summary '+(missingTasks?'needs-attention':'')+'"><strong>\u672c\u5468\u8fdb\u5c55 '+filledTasks+'/'+activeTasks+' \u5df2\u586b\u5199</strong><span>'+(missingTasks?'\u8fd8\u6709 '+missingTasks+' \u9879\u5f85\u8865\u5145':'\u672c\u5468\u8fdb\u5c55\u5df2\u9f50\u5168')+(pausedTasks?' \u00b7 '+pausedTasks+' \u9879\u6302\u8d77\u4e0d\u8ba1\u5165':'')+'</span></div>';
 
   struct.forEach(function(obj,oi){
     var avg=0,krIds=obj.krIds||[];
@@ -833,7 +816,7 @@ function render(){
       h+='<div style="display:flex;flex-direction:column;gap:4px"><div class="kh">';
       h+='<input class="ei kn" value="'+esc(kr.title)+'" placeholder="\u5173\u952e\u4efb\u52a1" oninput="ukr(\''+kid+'\',\'title\',this.value)" onkeydown="ek(event)">';
       h+='<input class="ei ow" value="'+esc(kr.owner||'')+'" placeholder="\u8d23\u4efb\u4eba" oninput="ukr(\''+kid+'\',\'owner\',this.value)" onkeydown="ek(event)"></div>';
-      h+='<div class="pl">\u672c\u5468\u8fdb\u5c55</div><textarea class="ta" placeholder="\u672c\u5468\u505a\u4e86\u4ec0\u4e48..." oninput="ukr(\''+kid+'\',\'thisWeek\',this.value);ah(this)" onfocus="ah(this)" rows="1">'+esc(kr.thisWeek||'')+'</textarea>';
+      var itemList=progressItems(kr.thisWeek);h+='<div class="pl">\u672c\u5468\u8fdb\u5c55 \u00b7 \u6bcf\u6761\u72ec\u7acb\u8bb0\u5f55</div><div class="progress-items">';itemList.forEach(function(item,itemIndex){h+='<div class="progress-item-row"><span class="progress-item-index">'+(itemIndex+1)+'</span><textarea class="ta progress-item" data-progress-item="'+kid+'-'+itemIndex+'" placeholder="\u8bb0\u5f55\u4e00\u6761\u5177\u4f53\u8fdb\u5c55" oninput="updateProgressItem(\''+kid+'\','+itemIndex+',this.value);ah(this)" onfocus="ah(this)" rows="1">'+esc(item)+'</textarea><button class="progress-item-remove" onclick="removeProgressItem(\''+kid+'\','+itemIndex+')" title="\u5220\u9664\u8fd9\u6761\u8fdb\u5c55">\u00d7</button></div>'});h+='</div><button class="progress-add" onclick="addProgressItem(\''+kid+'\','+(itemList.length-1)+')">+ \u6dfb\u52a0\u4e00\u6761\u8fdb\u5c55</button>';
       h+='<div class="pl">\u4e0a\u5468\u8fdb\u5c55</div><textarea class="ta lw" placeholder="\u4e0a\u5468\uff08\u81ea\u52a8\u7ee7\u627f\uff09" oninput="ukr(\''+kid+'\',\'lastWeek\',this.value);ah(this)" onfocus="ah(this)" rows="1">'+esc(kr.lastWeek||'')+'</textarea>';
       h+='<button class="hl" onclick="openHist(\''+kid+'\',\''+esc(kr.title)+'\')">\u67e5\u770b\u5386\u53f2</button></div>';
       h+='<div class="pc"><div class="pp"><button class="pb" style="border-radius:var(--radius-sm) 0 0 var(--radius-sm)" onclick="upct(\''+kid+'\',-5)">\u2212</button>';

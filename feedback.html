@@ -34,12 +34,9 @@
     <div id="list" class="list"></div>
   </section>
 </main>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
 var firebaseConfig={apiKey:"AIzaSyCzQ81s_xCVQzhGrKKspjqaxIDlujvbmKc",authDomain:"family-sync-app-b3d51.firebaseapp.com",databaseURL:"https://family-sync-app-b3d51-default-rtdb.firebaseio.com",projectId:"family-sync-app-b3d51",storageBucket:"family-sync-app-b3d51.firebasestorage.app",messagingSenderId:"545912389388",appId:"1:545912389388:web:95de71d8248310b8821329"};
-firebase.initializeApp(firebaseConfig);
-var db=firebase.database();
+async function firebaseRequest(path,method,value){var options={method:method||'GET',headers:{accept:'application/json'}};if(value!==undefined){options.headers['content-type']='application/json';options.body=JSON.stringify(value)}var response=await fetch(firebaseConfig.databaseURL+'/'+path+'.json',options);if(!response.ok)throw new Error('Firebase HTTP '+response.status);return response.json()}
 var form=document.getElementById('feedback-form');
 var statusEl=document.getElementById('status');
 var listEl=document.getElementById('list');
@@ -48,12 +45,12 @@ form.addEventListener('submit',function(e){
   var data=Object.fromEntries(new FormData(form).entries());
   var item={reporter:data.reporter||'匿名',area:data.area||'其他',title:data.title,detail:data.detail,impact:data.impact||'',priority:'normal',status:'candidate',source:'github-pages-emergency',createdAt:new Date().toISOString()};
   statusEl.className='status';statusEl.textContent='提交中...';
-  db.ref('productFeedback').push(item).then(function(){statusEl.className='status ok';statusEl.textContent='已提交，会进入产品优化候选池。';form.reset();loadFeedback()}).catch(function(err){statusEl.className='status err';statusEl.textContent='保存失败：'+err.message});
+  firebaseRequest('productFeedback','POST',item).then(function(){statusEl.className='status ok';statusEl.textContent='已提交，会进入产品优化候选池。';form.reset();loadFeedback()}).catch(function(err){statusEl.className='status err';statusEl.textContent='保存失败：'+err.message});
 });
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 function loadFeedback(){
-  db.ref('productFeedback').limitToLast(8).once('value').then(function(s){
-    var items=[];s.forEach(function(child){items.push(child.val())});items.reverse();
+  firebaseRequest('productFeedback','GET').then(function(records){
+    var items=Object.values(records||{}).sort(function(a,b){return String(b.createdAt||'').localeCompare(String(a.createdAt||''))}).slice(0,8);
     listEl.innerHTML=items.map(function(x){return '<article class="item"><b>'+esc(x.title)+'</b><p>'+esc([x.area,x.reporter,x.createdAt].filter(Boolean).join(' · '))+'</p><p>'+esc(x.detail)+'</p></article>'}).join('');
   }).catch(function(){listEl.innerHTML=''});
 }

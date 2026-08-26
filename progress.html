@@ -30,7 +30,9 @@
     .fill{color:var(--muted);font-size:12px}.tasks{display:grid;gap:8px;margin:14px 0 0;padding:0;list-style:none}.tasks li{min-width:0;border-top:1px solid var(--line);padding-top:10px}
     .task-head strong{min-width:0;overflow-wrap:anywhere;font-size:13px}.task-head span{flex:0 0 auto;border-radius:999px;padding:3px 7px;font-size:11px;font-weight:800}
     .tasks .filled .task-head span{background:#e8f4ef;color:#115e59}.tasks .missing .task-head span{background:#fff0ed;color:var(--red)}
+    .tasks .paused{opacity:.72}.tasks .paused .task-head span{background:#ece8df;color:var(--muted)}
     .tasks p,.tasks small{display:block;margin-top:6px;color:var(--muted);font-size:12px;line-height:1.5;overflow-wrap:anywhere}.tasks .missing p{color:var(--amber)}
+    .progress-list{display:grid;gap:4px;margin:7px 0 0;padding-left:20px;color:var(--muted);font-size:12px;line-height:1.5}.progress-list li{border:0;padding:0}
     .state{padding:28px;color:var(--muted);line-height:1.7}.state.error{color:var(--red)}
     .note{margin-top:18px;border:1px solid var(--line);border-radius:8px;background:#fff;padding:14px;color:var(--muted);font-size:12px;line-height:1.6}
     @media(max-width:760px){header,.overview-head{align-items:stretch;flex-direction:column}nav{justify-content:flex-start}.metrics,.projects{grid-template-columns:1fr}}
@@ -55,42 +57,37 @@
     </section>
     <p class="note">备用页只展示最新周执行状态；3—6 月历史路线图请在正式入口查看。若正式入口被 Cloudflare 拦截，周报填写和本页实时概览仍可继续使用。</p>
   </main>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <script>
     var firebaseConfig={apiKey:"AIzaSyCzQ81s_xCVQzhGrKKspjqaxIDlujvbmKc",authDomain:"family-sync-app-b3d51.firebaseapp.com",databaseURL:"https://family-sync-app-b3d51-default-rtdb.firebaseio.com",projectId:"family-sync-app-b3d51",storageBucket:"family-sync-app-b3d51.firebasestorage.app",messagingSenderId:"545912389388",appId:"1:545912389388:web:95de71d8248310b8821329"};
-    var database=null;
+    async function firebaseGet(path){var response=await fetch(firebaseConfig.databaseURL+'/'+path+'.json',{headers:{accept:'application/json'}});if(!response.ok)throw new Error('Firebase HTTP '+response.status);return response.json()}
     function fixArray(value){if(!value)return[];if(Array.isArray(value))return value;if(typeof value==='object')return Object.keys(value).sort(function(a,b){return Number(a)-Number(b)}).map(function(key){return value[key]});return[value]}
     function escapeHtml(value){return String(value||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
     function weekLabel(week){var date=new Date(week+'T00:00:00Z');var thursday=new Date(date);thursday.setUTCDate(date.getUTCDate()+3-((date.getUTCDay()+6)%7));var first=new Date(Date.UTC(thursday.getUTCFullYear(),0,4));var number=1+Math.round(((thursday-first)/86400000-3+((first.getUTCDay()+6)%7))/7);return 'W'+number+' · '+week}
     async function loadProgress(){
       document.getElementById('content').innerHTML='<p class="state">正在连接周报数据，请稍候。</p>';
       try{
-        if(!window.firebase||!firebase.database)throw new Error('Firebase SDK 未加载');
-        if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
-        database=database||firebase.database();
-        var meta=(await database.ref('okr/meta').once('value')).val()||{};
+        var meta=await firebaseGet('okr/meta')||{};
         var weeks=fixArray(meta.weekList).filter(Boolean).sort(function(a,b){return Date.parse(a)-Date.parse(b)});
         var latest=weeks[weeks.length-1];
         if(!latest)throw new Error('没有可用周次');
-        var week=(await database.ref('okr/weeks/'+latest).once('value')).val();
+        var week=await firebaseGet('okr/weeks/'+latest);
         if(!week)throw new Error('最新周数据为空');
         render(latest,week);
       }catch(error){document.getElementById('week-title').textContent='实时数据暂不可用';document.getElementById('content').innerHTML='<p class="state error">读取失败：'+escapeHtml(error.message)+'。请先打开周报填写页，或稍后重试。</p>'}
     }
     function render(latest,week){
-      var struct=fixArray(week.struct),krs=week.krs||{},total=0,filled=0;
+      var struct=fixArray(week.struct),krs=week.krs||{},total=0,active=0,paused=0,filled=0;
       var cards=struct.map(function(objective,index){
-        var ids=fixArray(objective.krIds),tasks=[],progress=0;
-        ids.forEach(function(id){var task=krs[id];if(!task)return;total++;progress+=Number(task.pct)||0;var current=String(task.thisWeek||'').trim();if(current)filled++;tasks.push({id:id,title:task.title||'未命名关键任务',owner:task.owner||'',progress:Math.max(0,Math.min(100,Number(task.pct)||0)),status:task.status||'',current:current,last:task.lastWeek||''})});
-        var average=tasks.length?Math.round(progress/tasks.length):0;
-        var filledInProject=tasks.filter(function(task){return task.current}).length;
-        var items=tasks.map(function(task){var text=task.current||(task.last?'上周：'+task.last:'暂无进展说明');return '<li class="'+(task.current?'filled':'missing')+'"><div class="task-head"><strong>'+escapeHtml(task.title)+'</strong><span>'+(task.current?'已更新':'待填写')+'</span></div><p>'+escapeHtml(text)+'</p><small>'+escapeHtml(task.owner||'负责人待补充')+' · '+task.progress+'%'+(task.status?' · '+escapeHtml(task.status):'')+'</small></li>'}).join('');
-        return '<article class="project"><div class="project-head"><div class="project-title"><span>'+String(index+1).padStart(2,'0')+'</span><h3>'+escapeHtml(objective.title||'重点工作')+'</h3></div><strong>'+average+'%</strong></div><div class="track"><span style="width:'+average+'%"></span></div><p class="fill">'+filledInProject+'/'+tasks.length+' 项已填写本周进展</p><ul class="tasks">'+items+'</ul></article>';
+        var ids=fixArray(objective.krIds),tasks=[];
+        ids.forEach(function(id){var task=krs[id];if(!task)return;total++;var current=String(task.thisWeek||'').trim();var isPaused=/挂起|暂停|搁置/.test(String(objective.title||'')+' '+String(task.title||'')+' '+String(task.status||''));if(isPaused)paused++;else{active++;if(current)filled++}tasks.push({id:id,title:task.title||'未命名关键任务',owner:task.owner||'',progress:Math.max(0,Math.min(100,Number(task.pct)||0)),status:task.status||'',current:current,last:task.lastWeek||'',paused:isPaused})});
+        var activeProject=tasks.filter(function(task){return !task.paused});var average=activeProject.length?Math.round(activeProject.reduce(function(sum,task){return sum+task.progress},0)/activeProject.length):0;
+        var filledInProject=activeProject.filter(function(task){return task.current}).length;var pausedInProject=tasks.length-activeProject.length;
+        var items=tasks.map(function(task){var detail=task.current?'<ol class="progress-list">'+task.current.split(/\r?\n/).filter(Boolean).map(function(line){return '<li>'+escapeHtml(line)+'</li>'}).join('')+'</ol>':'<p>'+(task.last?'上周：'+escapeHtml(task.last):'暂无进展说明')+'</p>';return '<li class="'+(task.paused?'paused':task.current?'filled':'missing')+'"><div class="task-head"><strong>'+escapeHtml(task.title)+'</strong><span>'+(task.paused?'已挂起':task.current?'已更新':'待填写')+'</span></div>'+detail+'<small>'+escapeHtml(task.owner||'负责人待补充')+' · '+task.progress+'%'+(task.status?' · '+escapeHtml(task.status):'')+'</small></li>'}).join('');
+        return '<article class="project"><div class="project-head"><div class="project-title"><span>'+String(index+1).padStart(2,'0')+'</span><h3>'+escapeHtml(objective.title||'重点工作')+'</h3></div><strong>'+average+'%</strong></div><div class="track"><span style="width:'+average+'%"></span></div><p class="fill">'+filledInProject+'/'+activeProject.length+' 项已填写'+(pausedInProject?' · '+pausedInProject+' 项挂起':'')+'</p><ul class="tasks">'+items+'</ul></article>';
       }).join('');
-      var missing=Math.max(0,total-filled);
+      var missing=Math.max(0,active-filled);
       document.getElementById('week-title').textContent=weekLabel(latest);
-      document.getElementById('content').innerHTML='<div class="metrics"><div class="metric"><strong>'+struct.length+'</strong><span>重点工作</span></div><div class="metric"><strong>'+total+'</strong><span>关键任务</span></div><div class="metric '+(missing?'attention':'')+'"><strong>'+filled+'/'+total+'</strong><span>本周进展已填写</span></div><div class="metric"><strong>'+missing+'</strong><span>仍待补充</span></div></div><div class="projects">'+cards+'</div>';
+      document.getElementById('content').innerHTML='<div class="metrics"><div class="metric"><strong>'+struct.length+'</strong><span>重点工作</span></div><div class="metric"><strong>'+active+' + '+paused+'</strong><span>进行中 + 挂起</span></div><div class="metric '+(missing?'attention':'')+'"><strong>'+filled+'/'+active+'</strong><span>本周进展已填写</span></div><div class="metric"><strong>'+missing+'</strong><span>仍待补充</span></div></div><div class="projects">'+cards+'</div>';
     }
     loadProgress();
   </script>
