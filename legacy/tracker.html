@@ -143,12 +143,14 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{
 .present-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
 .present-body{display:grid;grid-template-columns:1fr 230px;gap:24px;align-content:start}
 .present-list{display:grid;gap:14px}
-.present-card{display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;align-items:start;padding:15px 16px;background:#fff;border:1px solid var(--line);border-radius:var(--radius)}
-.present-card-index{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:var(--soft);color:var(--blue);font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
-.present-card-content{min-width:0}
+.present-card{min-width:0;padding:15px 16px;background:#fff;border:1px solid var(--line);border-radius:var(--radius)}
 .present-card h2{margin:0 0 8px;font-size:clamp(20px,2vw,30px);line-height:1.25}
 .present-card p{margin:0;color:var(--gray5);font-size:clamp(16px,1.35vw,21px);line-height:1.65}
 .present-card .present-owner{margin-bottom:8px;color:var(--muted);font-size:14px;font-weight:700}
+.present-weekly-list{display:grid;gap:8px;margin-top:10px}
+.present-weekly-item{display:grid;grid-template-columns:24px minmax(0,1fr);gap:10px;align-items:start;min-width:0}
+.present-weekly-index{display:flex;align-items:center;justify-content:center;width:24px;height:24px;margin-top:3px;border-radius:50%;background:var(--soft);color:var(--blue);font-size:11px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
+.present-weekly-text{min-width:0;color:var(--gray5);font-size:clamp(16px,1.35vw,21px);line-height:1.65;overflow-wrap:anywhere}
 .present-progress{display:grid;gap:16px;align-content:start;padding:18px;background:var(--soft);border:1px solid var(--line)}
 .present-progress b{font-size:clamp(42px,5vw,76px);line-height:1;font-variant-numeric:tabular-nums}
 .present-bottom{display:flex;align-items:center;justify-content:space-between;gap:14px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
@@ -735,17 +737,28 @@ function enterFullscreen(){
   if(el.requestFullscreen)el.requestFullscreen().catch(function(){});
 }
 
+function presentProgressText(item,index){
+  return String(item||'').replace(new RegExp('^\\s*'+(index+1)+'[、.．,，:：)）]\\s*'),'');
+}
+
 function presentShell(cfg, stepFn, exitFn){
   var h='<div class="present-shell"><section class="present-stage">';
   h+='<div class="present-top"><div class="present-title"><span class="on">'+String(cfg.idx+1).padStart(2,'0')+'</span><h1>'+esc(cfg.title)+'</h1></div>';
   h+='<div class="present-meta">'+(cfg.readonly?'<span class="mode-badge">只读快照</span>':'')+'<span class="ws">'+esc(cfg.label)+'</span><span class="oa">'+cfg.avg+'%</span></div></div>';
   h+='<div class="present-body"><div class="present-list">';
-  cfg.items.forEach(function(x,itemIndex){
-    h+='<article class="present-card"><span class="present-card-index">'+String(itemIndex+1).padStart(2,'0')+'</span><div class="present-card-content"><h2>'+esc(x.title)+'</h2>';
+  cfg.items.forEach(function(x){
+    h+='<article class="present-card"><h2>'+esc(x.title)+'</h2>';
     if(x.owner||x.status)h+='<div class="present-owner">'+esc([x.owner,x.status].filter(Boolean).join(' · '))+'</div>';
-    if(x.tw)h+='<p>'+esc(x.tw)+'</p>';
+    if(x.tw){
+      var weeklyItems=progressItems(x.tw).filter(function(item){return String(item||'').trim()});
+      if(weeklyItems.length){
+        h+='<div class="present-weekly-list">';
+        weeklyItems.forEach(function(item,progressIndex){h+='<div class="present-weekly-item"><span class="present-weekly-index">'+(progressIndex+1)+'</span><div class="present-weekly-text">'+esc(presentProgressText(item,progressIndex))+'</div></div>'});
+        h+='</div>';
+      }
+    }
     if(x.lw)h+='<p style="margin-top:8px;color:#8f887c;font-style:italic">'+esc(x.lw)+'</p>';
-    h+='</div></article>';
+    h+='</article>';
   });
   h+='</div><aside class="present-progress"><span>'+esc(cfg.label)+'</span><b>'+cfg.avg+'%</b><div class="br"><div class="bf" style="width:'+cfg.avg+'%"></div></div><span>第 '+(cfg.idx+1)+' / '+cfg.total+' 个大项目</span></aside></div>';
   h+='<div class="present-bottom"><span>左右方向键切换 · Esc 退出 · 适合投屏逐页汇报</span><div class="present-actions">';
