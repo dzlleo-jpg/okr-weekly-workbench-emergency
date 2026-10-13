@@ -559,6 +559,7 @@ function ah(el){if(!el)return;el.style.height='0';el.style.height=el.scrollHeigh
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function progressItems(text){var items=String(text||'').replace(/\r/g,'').split('\n');return items.length?items:['']}
 function mergeProgressInput(text,idx,value){var items=progressItems(text),parts=String(value||'').replace(/\r/g,'').split('\n');if(idx<0||idx>=items.length)return{items:items,inserted:0};items.splice.apply(items,[idx,1].concat(parts));return{items:items,inserted:parts.length}}
+function mergeStructureSave(pending,struct,krsPatch){var next=pending||{struct:struct,krsPatch:{}};next.struct=struct;Object.keys(krsPatch||{}).forEach(function(kid){next.krsPatch[kid]=krsPatch[kid]});return next}
 function isPausedText(text){return /挂起|暂停|搁置/.test(String(text||''))}
 function isPausedTask(task,obj){return isPausedText(task&&task.title)||isPausedText(task&&task.status)||isPausedText(obj&&obj.title)}
 
@@ -578,6 +579,7 @@ function fixWeekData(wd){
 }
 
 var debounceTimers={};
+var pendingStructureSaves={};
 function deb(k,fn,ms){clearTimeout(debounceTimers[k]);debounceTimers[k]=setTimeout(fn,ms||800)}
 function fbGet(path){if(!db)return sitesGet(path);return firebaseRest(path,'GET').catch(function(){db=null;return sitesGet(path)})}
 function fbSet(path,val){return db?firebaseRest(path,'PUT',val):sitesSet(path,val)}
@@ -683,8 +685,8 @@ function savePatch(key,patch){
 function saveWeekPatch(krsPatch){
   var mon=S.meta.weekList[S.wi];
   saveDot('saving');
-  var patch={op:'structure',week:mon,struct:S.wd.struct,krsPatch:krsPatch||{}};
-  deb('save-week-'+mon,function(){(db?firebasePatch(patch):sitesPatch(patch)).then(function(){saveDot('saved');setTimeout(function(){saveDot('idle')},4000)}).catch(function(e){console.error(e);saveDot('failed')})},600);
+  pendingStructureSaves[mon]=mergeStructureSave(pendingStructureSaves[mon],S.wd.struct,krsPatch);
+  deb('save-week-'+mon,function(){var pending=pendingStructureSaves[mon];delete pendingStructureSaves[mon];var patch={op:'structure',week:mon,struct:pending.struct,krsPatch:pending.krsPatch};(db?firebasePatch(patch):sitesPatch(patch)).then(function(){saveDot('saved');setTimeout(function(){saveDot('idle')},4000)}).catch(function(e){console.error(e);saveDot('failed')})},600);
 }
 
 // ── actions (text edits: no render; structural changes: render) ──
@@ -720,8 +722,9 @@ function ddrop(e,t,i,oi){
 }
 
 // ── history ──
-async function openHist(kid,title){
-  S.drawer={title:title,items:null};render();var items=[];
+async function openHist(kid){
+  var current=S.wd&&S.wd.krs?S.wd.krs[kid]:null;
+  S.drawer={title:current&&current.title?current.title:'查看历史',items:null};render();var items=[];
   for(var i=S.meta.weekList.length-1;i>=0;i--){var mon=S.meta.weekList[i];var wd=fixWeekData(await fbGet('okr/weeks/'+mon));if(wd&&wd.krs&&wd.krs[kid]){var k=wd.krs[kid];items.push({label:wkLabel(mon),pct:k.pct,status:k.status,tw:k.thisWeek})}}
   S.drawer.items=items;render();
 }
@@ -843,7 +846,7 @@ function render(){
       h+='<input class="ei ow" value="'+esc(kr.owner||'')+'" placeholder="\u8d23\u4efb\u4eba" oninput="ukr(\''+kid+'\',\'owner\',this.value)" onkeydown="ek(event)"></div>';
       var itemList=progressItems(kr.thisWeek);h+='<div class="pl">\u672c\u5468\u8fdb\u5c55 \u00b7 \u6bcf\u6761\u72ec\u7acb\u8bb0\u5f55</div><div class="progress-items">';itemList.forEach(function(item,itemIndex){h+='<div class="progress-item-row"><span class="progress-item-index">'+(itemIndex+1)+'</span><textarea class="ta progress-item" data-progress-item="'+kid+'-'+itemIndex+'" placeholder="\u8bb0\u5f55\u4e00\u6761\u5177\u4f53\u8fdb\u5c55" oninput="updateProgressItem(\''+kid+'\','+itemIndex+',this.value,event);ah(this)" onkeydown="progressItemKeydown(event,\''+kid+'\','+itemIndex+')" onfocus="ah(this)" rows="1">'+esc(item)+'</textarea><button class="progress-item-remove" onclick="removeProgressItem(\''+kid+'\','+itemIndex+')" title="\u5220\u9664\u8fd9\u6761\u8fdb\u5c55">\u00d7</button></div>'});h+='</div><button class="progress-add" onclick="addProgressItem(\''+kid+'\','+(itemList.length-1)+')">+ \u6dfb\u52a0\u4e00\u6761\u8fdb\u5c55</button>';
       h+='<div class="pl">\u4e0a\u5468\u8fdb\u5c55</div><textarea class="ta lw" placeholder="\u4e0a\u5468\uff08\u81ea\u52a8\u7ee7\u627f\uff09" oninput="ukr(\''+kid+'\',\'lastWeek\',this.value);ah(this)" onfocus="ah(this)" rows="1">'+esc(kr.lastWeek||'')+'</textarea>';
-      h+='<button class="hl" onclick="openHist(\''+kid+'\',\''+esc(kr.title)+'\')">\u67e5\u770b\u5386\u53f2</button></div>';
+      h+='<button class="hl" onclick="openHist(\''+kid+'\')">\u67e5\u770b\u5386\u53f2</button></div>';
       h+='<div class="pc"><div class="pp"><button class="pb" style="border-radius:var(--radius-sm) 0 0 var(--radius-sm)" onclick="upct(\''+kid+'\',-5)">\u2212</button>';
       h+='<span class="pv">'+kr.pct+'</span><button class="pb" style="border-radius:0 var(--radius-sm) var(--radius-sm) 0" onclick="upct(\''+kid+'\',5)">+</button><span class="pu">%</span></div>';
       h+='<div class="br"><div class="bf" style="width:'+kr.pct+'%"></div>';
