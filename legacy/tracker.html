@@ -216,6 +216,8 @@ var firebaseConfig = {
 
 var db = null;
 var FIREBASE_DATABASE_URL = firebaseConfig.databaseURL;
+var FIREBASE_VERIFY_ID=new URLSearchParams(location.search).get('verify')||'';
+if(!/^verify-[a-z0-9-]+$/.test(FIREBASE_VERIFY_ID))FIREBASE_VERIFY_ID='';
 var LOCAL_VIEW = null;
 var TRACKER_STATE_API = '/api/tracker-state';
 var TRACKER_STATE = null;
@@ -437,7 +439,8 @@ function renderLocalSnapshot(data){
 
     LOCAL_VIEW.weekIdx=idx;
     var h='<div class="app"><header><h1>2026 团队重点工作</h1>';
-    h+='<div class="hr"><span style="background:var(--orange);color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600">只读快照</span>';
+    if(FIREBASE_VERIFY_ID)h+='<strong>隔离保存验收 · 不写入团队周报</strong>';
+  h+='<div class="hr"><span style="background:var(--orange);color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600">只读快照</span>';
     h+='<button onclick="connectFirebase()">在线编辑</button>';
     h+='<button onclick="startLocalPresent()">投屏播放</button></div></header>';
 
@@ -546,7 +549,7 @@ function loadScript(src){
   });
 }
 
-function firebaseRestUrl(path){return FIREBASE_DATABASE_URL+'/'+String(path||'').replace(/^\/+|\/+$/g,'')+'.json'}
+function firebaseRestUrl(path){var clean=String(path||'').replace(/^\/+|\/+$/g,'');if(FIREBASE_VERIFY_ID)clean='okr-checks/'+FIREBASE_VERIFY_ID+(clean?'/'+clean:'');return FIREBASE_DATABASE_URL+'/'+clean+'.json'}
 async function firebaseRest(path,method,value){var options={method:method||'GET',headers:{'accept':'application/json'}};if(value!==undefined){options.headers['content-type']='application/json';options.body=JSON.stringify(value)}var resp=await fetch(firebaseRestUrl(path),options);if(!resp.ok)throw new Error('Firebase HTTP '+resp.status);return method==='GET'||!method?await resp.json():true}
 function connectFirebase(){document.getElementById('root').innerHTML='<div class="app loading">正在读取本周协作数据...</div>';db={mode:'rest'};init()}
 
@@ -681,23 +684,36 @@ function saveDot(st){
 }
 function saveWeek(){
   var mon=S.meta.weekList[S.wi];saveDot('saving');
-  deb('save',function(){fbSet('okr/weeks/'+mon,S.wd).then(function(){saveDot('saved');setTimeout(function(){saveDot('idle')},1000)}).catch(function(e){console.error(e);saveDot('failed')})});
+  deb('save',function(){fbSet('okr/weeks/'+mon,S.wd).then(function(){saveDot('saved')}).catch(function(e){console.error(e);saveDot('failed')})});
 }
 function savePatch(key,patch){
   saveDot('saving');
-  deb('save-'+key,function(){(db?firebasePatch(patch):sitesPatch(patch)).then(function(){saveDot('saved');setTimeout(function(){saveDot('idle')},4000)}).catch(function(e){console.error(e);saveDot('failed')})},600);
+  deb('save-'+key,function(){(db?firebasePatch(patch):sitesPatch(patch)).then(function(){saveDot('saved')}).catch(function(e){console.error(e);saveDot('failed')})},600);
 }
 function saveWeekPatch(krsPatch){
   var mon=S.meta.weekList[S.wi];
   saveDot('saving');
   pendingStructureSaves[mon]=mergeStructureSave(pendingStructureSaves[mon],S.wd.struct,krsPatch);
-  deb('save-week-'+mon,function(){var pending=pendingStructureSaves[mon];delete pendingStructureSaves[mon];var patch={op:'structure',week:mon,struct:pending.struct,krsPatch:pending.krsPatch};(db?firebasePatch(patch):sitesPatch(patch)).then(function(){saveDot('saved');setTimeout(function(){saveDot('idle')},4000)}).catch(function(e){console.error(e);saveDot('failed')})},600);
+  deb('save-week-'+mon,function(){var pending=pendingStructureSaves[mon];delete pendingStructureSaves[mon];var patch={op:'structure',week:mon,struct:pending.struct,krsPatch:pending.krsPatch};(db?firebasePatch(patch):sitesPatch(patch)).then(function(){saveDot('saved')}).catch(function(e){console.error(e);saveDot('failed')})},600);
 }
 
 // ── actions (text edits: no render; structural changes: render) ──
 function sw(idx){if(!S.meta||idx<0||idx>=S.meta.weekList.length)return;S.wi=idx;S.loading=true;render();loadWeek(S.meta.weekList,idx).then(function(){S.loading=false;render()})}
 function ukr(kid,f,v){S.wd.krs[kid][f]=v;savePatch(S.meta.weekList[S.wi]+'-'+kid+'-'+f,{op:'krField',week:S.meta.weekList[S.wi],kid:kid,field:f,value:v})}
 function updateProgressItem(kid,idx,value,event){if(event&&event.isComposing)return;var kr=S.wd.krs[kid],items=progressItems(kr.thisWeek,kr.thisWeekItems);items[idx]=String(value||'').replace(/\r/g,'');saveProgressItems(kid,items)}
+// Commit the final IME value; composing input events intentionally skip persistence.
+function commitProgressField(event){
+  var el=event.target;
+  if(!el||!el.matches||!el.matches('[data-progress-item]'))return;
+  var key=el.getAttribute('data-progress-item'),split=key.lastIndexOf('-');
+  var kid=key.slice(0,split),idx=Number(key.slice(split+1));
+  if(!S.wd||!S.wd.krs[kid])return;
+  var kr=S.wd.krs[kid],items=progressItems(kr.thisWeek,kr.thisWeekItems);
+  if(items[idx]!==el.value)updateProgressItem(kid,idx,el.value);
+}
+document.addEventListener('compositionend',commitProgressField);
+document.addEventListener('blur',commitProgressField,true);
+
 function progressItemKeydown(e,kid,idx){if(e.isComposing||e.keyCode===229)return;if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();addProgressItem(kid,idx)}}
 function saveProgressItems(kid,items){var kr=S.wd.krs[kid];kr.thisWeekItems=items;kr.thisWeek=items.join('\n');savePatch(S.meta.weekList[S.wi]+'-'+kid+'-progressItems',{op:'progressItems',week:S.meta.weekList[S.wi],kid:kid,items:items})}
 function addProgressItem(kid,after){var kr=S.wd.krs[kid],items=progressItems(kr.thisWeek,kr.thisWeekItems);items.splice(after+1,0,'');saveProgressItems(kid,items);render();setTimeout(function(){var el=document.querySelector('[data-progress-item="'+kid+'-'+(after+1)+'"]');if(el){el.focus();ah(el)}},0)}
@@ -816,7 +832,7 @@ function render(){
   }
 
   var h='<div class="app"><header><h1>2026 \u56e2\u961f\u91cd\u70b9\u5de5\u4f5c</h1>';
-  h+='<div class="hr"><div class="sd '+S.ss+'"></div><span class="ss-text" style="min-width:50px">'+(S.ss==='saving'?'\u4fdd\u5b58\u4e2d...':S.ss==='saved'?'\u2713 \u5df2\u4fdd\u5b58':'')+'</span>';
+  h+='<div class="hr"><div class="sd '+S.ss+'"></div><span class="ss-text" style="min-width:50px">'+(S.ss==='saving'?'\u4fdd\u5b58\u4e2d...':S.ss==='saved'?'\u2713 \u5df2\u4fdd\u5b58':S.ss==='failed'?'保存失败，请保留内容后重试':'')+'</span>';
   h+='<button onclick="startPresent()">\u6295\u5c4f\u64ad\u653e</button><button onclick="loadLocalSnapshot()">\u672c\u5730\u5feb\u7167</button><button onclick="init()">\u5237\u65b0</button></div></header>';
   h+='<div class="wn"><button class="ar '+(wi<=0?'off':'')+'" onclick="sw('+(wi-1)+')">\u2039</button>';
   h+='<div class="wl">'+wkLabel(curMon)+(isLast?'<span class="ws">\u5f53\u524d</span>':'')+'</div>';
