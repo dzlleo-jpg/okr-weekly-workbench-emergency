@@ -13,8 +13,8 @@
 
 - Codex 自动化 ID：`okr-loop`。
 - 频率：每天运行一次。
-- 固定读取线上反馈：`https://okr-weekly-workbench.leodong.chatgpt.site/api/feedback`。
-- 固定生产站点：`https://okr-weekly-workbench.leodong.chatgpt.site`。
+- **当前团队主入口**：`https://dzlleo-jpg.github.io/okr-weekly-workbench-emergency/`（建议页 `feedback.html`；周报 `tracker.html`，可加 `?release=` 防缓存）。
+- Sites 域名已暂停作团队入口：`https://okr-weekly-workbench.leodong.chatgpt.site`（Cloudflare 403，修好前不要当入口）。其上的 `/api/feedback` 在 Sites 恢复前不要当作唯一反馈源。
 - 每天最多选择 1 条高价值、可验证、低风险反馈进入产品迭代。
 - 如果当天没有合格反馈，只记录“已检查、无发布”，不为了凑版本做无意义改动。
 

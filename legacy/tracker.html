@@ -819,7 +819,7 @@ document.addEventListener('keydown',function(e){
 })
 
 // ── render ──
-function render(){
+function renderLegacy(){
   var root=document.getElementById('root');
   if(S.loading||!S.meta||!S.wd){root.innerHTML='<div class="app loading">Loading...</div>';return}
   var m=S.meta,wd=S.wd,wi=S.wi,curMon=m.weekList[wi],isLast=wi===m.weekList.length-1,struct=wd.struct,krs=wd.krs;
@@ -901,7 +901,9 @@ function bootTracker(){
   connectFirebase();
 }
 
-bootTracker();
 </script>
+<link rel="stylesheet" href="workbench.css">
+<script src="workbench.js"></script>
+<script>bootTracker();</script>
 </body>
 </html>
