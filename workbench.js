@@ -218,11 +218,12 @@ function render(){
   var obj=structs[idx],playing=!!S.present,disabled=playing?' disabled':'',week=S.meta.weekList[S.wi];
   workspaceWriteGate=playing;
   var status=S.ss==='saving'?'保存中…':S.ss==='failed'?'保存失败，本地草稿已保留':S.ss==='saved'?'✓ 已保存（服务器已确认）':S.ss==='confirming'?'正在核对服务器…':'修改后自动保存';
+  var verifyBadge=typeof FIREBASE_VERIFY_ID!=='undefined'&&FIREBASE_VERIFY_ID?'<span class="preview-badge" role="status">隔离验收 · '+esc(FIREBASE_VERIFY_ID)+' · 不写生产周报</span>':'';
   var previewBadge=wbIsPreview()?'<span class="preview-badge">预览模式 · 不写生产数据</span>':'';
   var h='<div class="workspace '+(playing?'is-playing':'')+'">';
-  h+='<header class="workspace-header"><a class="workspace-brand" href="tracker.html'+(wbIsPreview()?'?preview=1':'')+'">团队工作台<span>WEEKLY WORKSPACE</span></a>';
+  h+='<header class="workspace-header"><a class="workspace-brand" href="tracker.html'+(typeof FIREBASE_VERIFY_ID!=='undefined'&&FIREBASE_VERIFY_ID?'?verify='+encodeURIComponent(FIREBASE_VERIFY_ID):wbIsPreview()?'?preview=1':'')+'">团队工作台<span>WEEKLY WORKSPACE</span></a>';
   h+='<div class="workspace-week"><button onclick="wbSwitchWeek('+(S.wi-1)+')" '+(S.wi===0?'disabled':'')+' aria-label="上一周">‹</button><span>'+esc(wkLabel(week))+'</span><button onclick="wbSwitchWeek('+(S.wi+1)+')" '+(S.wi===S.meta.weekList.length-1?'disabled':'')+' aria-label="下一周">›</button></div>';
-  h+='<div class="workspace-actions">'+previewBadge+'<span class="sd '+S.ss+'"></span><span class="ss-text" role="status" aria-live="polite">'+status+'</span>';
+  h+='<div class="workspace-actions">'+verifyBadge+previewBadge+'<span class="sd '+S.ss+'"></span><span class="ss-text" role="status" aria-live="polite">'+status+'</span>';
   if(S.ss==='failed')h+='<button class="retry-button" onclick="wbRetrySave()">重试保存</button>';
   h+='<button class="mode-button" onclick="'+(playing?'exitPresent()':'startPresent()')+'">'+(playing?'返回编辑':'播放预览')+'</button></div></header>';
   h+='<div id="workspace-notice" class="workspace-notice" role="status" aria-live="polite"'+(workspaceNotice?'':' hidden')+'>'+esc(workspaceNotice)+'</div>';

@@ -588,7 +588,9 @@ function fixWeekData(wd){
 var debounceTimers={};
 var pendingStructureSaves={};
 function deb(k,fn,ms){clearTimeout(debounceTimers[k]);debounceTimers[k]=setTimeout(fn,ms||800)}
-function fbGet(path){if(!db)return sitesGet(path);return firebaseRest(path,'GET').catch(function(){db=null;return sitesGet(path)})}
+// A failed Firebase read must not change the selected backend. Propagate the
+// error so the workbench retains its draft and reports failed confirmation.
+function fbGet(path){return db?firebaseRest(path,'GET'):sitesGet(path)}
 function fbSet(path,val){return db?firebaseRest(path,'PUT',val):sitesSet(path,val)}
 function firebasePatch(patch){
   if(patch.op==='krField')return firebaseRest('okr/weeks/'+patch.week+'/krs/'+patch.kid+'/'+patch.field,'PUT',patch.value);
